@@ -100,7 +100,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(row, idx) in filteredData" :key="idx">
+              <tr v-for="(row, idx) in paginatedData" :key="idx">
                 <td class="font-bold highlight-flat">{{ row.flatNumber }}</td>
                 <td class="font-semibold">{{ row.name }}</td>
                 <td>{{ row.mobile }}</td>
@@ -139,6 +139,33 @@
               </tr>
             </tbody>
           </table>
+
+          <!-- Pagination Bar -->
+          <div class="pagination-bar" v-if="filteredData.length > 0">
+            <div class="page-size-selector">
+              <span>Rows per page:</span>
+              <select v-model="pageSize" @change="currentPage = 1">
+                <option :value="10">10</option>
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+                <option :value="100">100</option>
+              </select>
+            </div>
+
+            <div class="page-info">
+              Showing <strong>{{ startIndex + 1 }}</strong> to <strong>{{ Math.min(endIndex, filteredData.length) }}</strong> of <strong>{{ filteredData.length }}</strong> records
+            </div>
+
+            <div class="page-controls">
+              <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">
+                Previous
+              </button>
+              <span class="page-num">Page {{ currentPage }} of {{ totalPages }}</span>
+              <button class="page-btn" :disabled="currentPage >= totalPages" @click="currentPage++">
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -191,8 +218,36 @@ const searchQuery = ref('');
 const statusMessage = ref('');
 const statusType = ref('info');
 
-onMounted(() => {
-  loadFromStorage();
+// Pagination State
+const currentPage = ref(1);
+const pageSize = ref(10);
+
+const filteredData = computed(() => {
+  if (!searchQuery.value.trim()) return ledgerData.value;
+  const q = searchQuery.value.toLowerCase();
+  return ledgerData.value.filter(row => 
+    row.flatNumber.toLowerCase().includes(q) ||
+    row.name.toLowerCase().includes(q) ||
+    row.mobile.toLowerCase().includes(q) ||
+    row.bankDetail.toLowerCase().includes(q) ||
+    row.cashReceiver.toLowerCase().includes(q)
+  );
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredData.value.length / pageSize.value) || 1;
+});
+
+const startIndex = computed(() => {
+  return (currentPage.value - 1) * pageSize.value;
+});
+
+const endIndex = computed(() => {
+  return startIndex.value + pageSize.value;
+});
+
+const paginatedData = computed(() => {
+  return filteredData.value.slice(startIndex.value, endIndex.value);
 });
 
 const loadFromStorage = () => {
@@ -348,17 +403,6 @@ const generateSampleParsedRows = () => {
   ];
 };
 
-const filteredData = computed(() => {
-  if (!searchQuery.value.trim()) return ledgerData.value;
-  const q = searchQuery.value.toLowerCase();
-  return ledgerData.value.filter(row => 
-    row.flatNumber.toLowerCase().includes(q) ||
-    row.name.toLowerCase().includes(q) ||
-    row.mobile.toLowerCase().includes(q) ||
-    row.bankDetail.toLowerCase().includes(q) ||
-    row.cashReceiver.toLowerCase().includes(q)
-  );
-});
 </script>
 
 <style scoped>
@@ -649,5 +693,69 @@ const filteredData = computed(() => {
 .btn-receipt.secondary-btn:hover {
   color: var(--text-main);
   border-color: var(--primary);
+}
+
+/* Pagination Bar Styles */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0.5rem 0.5rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.page-size-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-size-selector select {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  outline: none;
+  font-size: 0.85rem;
+}
+
+.page-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-btn {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.page-btn:hover:not(:disabled) {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-num {
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 </style>

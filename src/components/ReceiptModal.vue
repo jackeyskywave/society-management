@@ -689,32 +689,37 @@ const downloadPdf = async () => {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm;
+    margin: 5mm;
   }
   body > * {
     display: none !important;
   }
-  body > .receipt-modal-backdrop,
+  body > div.receipt-modal-backdrop,
   .receipt-modal-backdrop {
-    display: block !important;
-    position: static !important;
-    background: transparent !important;
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background: #ffffff !important;
     padding: 0 !important;
-    overflow: visible !important;
+    margin: 0 !important;
+    z-index: 999999 !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
   }
   .receipt-modal {
-    background: transparent !important;
+    background: #ffffff !important;
     box-shadow: none !important;
-    max-width: 100% !important;
-    max-height: none !important;
     border: none !important;
+    width: 100% !important;
+    max-width: 790px !important;
+    max-height: none !important;
     overflow: visible !important;
   }
   .modal-actions {
     display: none !important;
   }
   .receipt-paper-wrapper {
-    background: transparent !important;
+    background: #ffffff !important;
     padding: 0 !important;
     display: block !important;
     overflow: visible !important;

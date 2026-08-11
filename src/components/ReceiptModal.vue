@@ -27,8 +27,7 @@
           <!-- Header Logo & Title -->
           <div class="receipt-header">
             <div class="logo-box">
-              <img src="/aristo-logo.jpg" alt="ARISTO BLISS" class="logo-img" />
-              <div class="logo-text-brand">ARISTO<br /><span class="logo-subtext">BLISS</span></div>
+              <img src="/aristo-logo.jpg" alt="ARISTO BLISS" class="exact-logo-img" />
             </div>
 
             <div class="society-title-block">
@@ -322,29 +321,18 @@ const downloadPdf = () => {
 .logo-box {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   border: 1px solid #d4af37;
-  padding: 4px 10px;
-  background-color: #faf8f2;
+  padding: 2px;
+  background-color: #ffffff;
+  width: 90px;
+  height: 90px;
 }
 
-.logo-img {
-  width: 38px;
-  height: 38px;
+.exact-logo-img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  border-radius: 4px;
-}
-
-.logo-text-brand {
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.1;
-  color: #333;
-}
-
-.logo-subtext {
-  font-size: 10px;
-  color: #c59b27;
 }
 
 .society-title-block {

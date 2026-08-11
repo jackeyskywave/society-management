@@ -161,19 +161,31 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import html2pdf from 'html2pdf.js';
 
 const props = defineProps({
   data: {
     type: Object,
     default: () => ({})
+  },
+  autoDownload: {
+    type: Boolean,
+    default: false
   }
 });
 
 defineEmits(['close']);
 
 const receiptContainer = ref(null);
+
+onMounted(() => {
+  if (props.autoDownload) {
+    setTimeout(() => {
+      downloadPdf();
+    }, 300);
+  }
+});
 
 // Late payment calculation logic: 1 Day = Rs. 10
 const lateDaysCount = computed(() => {

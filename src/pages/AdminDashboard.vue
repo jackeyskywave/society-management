@@ -147,6 +147,7 @@
     <ReceiptModal 
       v-if="selectedReceiptData" 
       :data="selectedReceiptData" 
+      :auto-download="shouldAutoDownload"
       @close="selectedReceiptData = null" 
     />
   </AdminLayout>
@@ -159,17 +160,21 @@ import ReceiptModal from '../components/ReceiptModal.vue';
 import * as pdfjsLib from 'pdfjs-dist';
 
 const selectedReceiptData = ref(null);
+const shouldAutoDownload = ref(false);
 
 const openReceipt = (row) => {
+  shouldAutoDownload.value = false;
   selectedReceiptData.value = row;
 };
 
 const directDownloadPdf = (row) => {
+  shouldAutoDownload.value = true;
   selectedReceiptData.value = row;
 };
 
 const downloadAllPdfs = () => {
   if (filteredData.value.length > 0) {
+    shouldAutoDownload.value = true;
     selectedReceiptData.value = filteredData.value[0];
   }
 };

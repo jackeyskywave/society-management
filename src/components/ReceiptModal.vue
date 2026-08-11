@@ -76,12 +76,12 @@
             </div>
 
             <div class="detail-item">
-              <span class="label">Payment Mode :</span>
-              <input v-model="editableData.paymentMode" class="edit-input bold-val" />
-            </div>
-            <div class="detail-item">
               <span class="label">Cash Receiver :</span>
               <input v-model="editableData.cashReceiver" class="edit-input bold-val" placeholder="-" />
+            </div>
+            <div class="detail-item">
+              <span class="label">Payment Mode :</span>
+              <input v-model="editableData.paymentMode" class="edit-input bold-val" />
             </div>
 
             <div class="detail-item full-row">

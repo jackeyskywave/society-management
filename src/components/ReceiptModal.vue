@@ -27,7 +27,7 @@
           <!-- Header Logo & Title -->
           <div class="receipt-header">
             <div class="logo-box">
-              <img src="/aristo-logo.jpg" alt="ARISTO BLISS" class="exact-logo-img" />
+              <img src="/aristo-logo.svg" alt="ARISTO BLISS" class="exact-logo-img" />
             </div>
 
             <div class="society-title-block">

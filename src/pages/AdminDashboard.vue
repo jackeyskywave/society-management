@@ -250,16 +250,14 @@ const paginatedData = computed(() => {
   return filteredData.value.slice(startIndex.value, endIndex.value);
 });
 
-const loadFromStorage = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      ledgerData.value = JSON.parse(saved);
-    }
-  } catch (err) {
-    console.error('Failed to load ledger data from storage:', err);
+onMounted(() => {
+  loadFromStorage();
+  if (ledgerData.value.length === 0) {
+    const defaultRows = generateSampleParsedRows();
+    ledgerData.value = defaultRows;
+    saveToStorage(defaultRows);
   }
-};
+});
 
 const saveToStorage = (data) => {
   try {

@@ -256,11 +256,16 @@ const downloadPdf = async () => {
   
   const element = receiptContainer.value;
   const opt = {
-    margin: [0.3, 0.3, 0.3, 0.3],
+    margin: 0,
     filename: `Receipt_${props.data.flatNumber || 'A-101'}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    html2canvas: { 
+      scale: 2, 
+      useCORS: true,
+      scrollX: 0,
+      scrollY: 0
+    },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
   
   try {
@@ -361,12 +366,12 @@ const downloadPdf = async () => {
 
 /* Exact Printable Receipt Layout matching image styling */
 .receipt-paper {
-  width: 100%;
-  max-width: 800px;
+  width: 790px;
+  margin: 0 auto;
   background-color: #ffffff;
   color: #000000;
   font-family: Arial, Helvetica, sans-serif;
-  padding: 25px;
+  padding: 30px 35px;
   border: 2px solid #c59b27; /* Gold border line */
   box-sizing: border-box;
 }
@@ -447,6 +452,7 @@ const downloadPdf = async () => {
 .detail-item {
   display: flex;
   align-items: center;
+  min-height: 22px;
 }
 
 .detail-item .label {
@@ -507,7 +513,7 @@ const downloadPdf = async () => {
 }
 
 .note-box {
-  border: 1.5 solid #c59b27;
+  border: 1.5px solid #c59b27;
   padding: 8px 12px;
   width: 55%;
   font-size: 10px;
@@ -562,8 +568,9 @@ const downloadPdf = async () => {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 11px;
   font-weight: 700;
-  line-height: 1.2;
-  padding: 1px 4px;
+  height: 20px;
+  line-height: 20px;
+  padding: 0 4px;
   box-sizing: border-box;
   vertical-align: middle;
   transition: border-color 0.2s ease;
@@ -608,6 +615,7 @@ const downloadPdf = async () => {
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 !important;
-  line-height: inherit !important;
+  height: auto !important;
+  line-height: 1.2 !important;
 }
 </style>

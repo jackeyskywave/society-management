@@ -281,7 +281,66 @@ const isExportingPdf = ref(false);
 const printReceipt = async () => {
   isExportingPdf.value = true;
   await new Promise(resolve => setTimeout(resolve, 100));
-  window.print();
+  
+  const element = receiptContainer.value;
+  const printWindow = window.open('', '_blank', 'width=850,height=1100');
+  
+  if (printWindow) {
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Receipt_${editableData.value.flatNumber}</title>
+          <style>
+            @page { size: A4 portrait; margin: 10mm; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { margin: 0; padding: 20px; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; }
+            .receipt-paper { width: 790px; margin: 0 auto; background-color: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif; padding: 30px 35px; border: 2px solid #c59b27 !important; box-sizing: border-box; }
+            .receipt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+            .logo-box { display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37 !important; padding: 2px; background-color: #ffffff !important; width: 90px; height: 90px; }
+            .exact-logo-img { width: 100%; height: 100%; object-fit: contain; }
+            .society-title-block { text-align: center; }
+            .society-name { font-size: 18px; font-weight: 800; margin: 0; color: #111111 !important; }
+            .society-tagline { font-size: 11px; font-style: italic; margin: 2px 0; color: #444444 !important; }
+            .society-address { font-size: 10px; margin: 0; color: #555555 !important; }
+            .date-block { font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; }
+            .section-banner { background-color: #c59b27 !important; color: #ffffff !important; text-align: center; font-weight: 800; font-size: 14px; padding: 6px; letter-spacing: 1px; margin-bottom: 15px; }
+            .details-grid { display: grid; grid-template-columns: 1fr 1fr; row-gap: 8px; column-gap: 20px; font-size: 11px; margin-bottom: 15px; }
+            .detail-item { display: flex; align-items: center; min-height: 22px; }
+            .detail-item .label { width: 145px; color: #000000 !important; font-weight: 800; flex-shrink: 0; }
+            .bold-val { font-weight: 800; }
+            .receipt-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px; }
+            .receipt-table th { background-color: #c59b27 !important; color: #ffffff !important; padding: 6px 10px; font-weight: 800; border: 1px solid #b38a1f !important; }
+            .receipt-table td { padding: 6px 10px; border: 1px solid #e2e8f0 !important; color: #000000 !important; }
+            .total-row { background-color: #f7f3e8 !important; }
+            .total-row td { border-top: 2px solid #c59b27 !important; font-size: 12px; }
+            .amount-words-block { font-size: 11px; margin-bottom: 20px; }
+            .receipt-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px; }
+            .note-box { border: 1.5px solid #c59b27 !important; padding: 8px 12px; width: 55%; font-size: 10px; color: #222222 !important; }
+            .note-title { font-weight: 800; margin-bottom: 4px; }
+            .note-box ul { list-style: none; padding: 0; margin: 0; }
+            .thank-you { margin-top: 8px; font-weight: 700; }
+            .signatures-box { display: flex; gap: 30px; }
+            .sig-line { display: flex; flex-direction: column; align-items: center; width: 130px; }
+            .sig-line .line { width: 100%; border-bottom: 1px solid #444444; margin-bottom: 4px; }
+            .sig-label { font-size: 10px; color: #333333 !important; }
+            input, select { border: none !important; outline: none !important; background: transparent !important; font-family: Arial, Helvetica, sans-serif !important; font-weight: 700 !important; font-size: 11px !important; color: #000000 !important; }
+            input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+          </style>
+        </head>
+        <body>
+          ${element.outerHTML}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 300);
+  }
+  
   isExportingPdf.value = false;
 };
 

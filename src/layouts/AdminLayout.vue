@@ -288,10 +288,13 @@ const handleLogout = () => {
 }
 
 @media print {
-  .header,
   .sidebar,
-  .main-wrapper {
+  .header {
     display: none !important;
+  }
+
+  .main-wrapper {
+    margin-left: 0 !important;
   }
 }
 </style>

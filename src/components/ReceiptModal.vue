@@ -79,7 +79,10 @@
               <span class="label">Payment Mode :</span>
               <input v-model="editableData.paymentMode" class="edit-input bold-val" />
             </div>
-            <div class="detail-item"></div>
+            <div class="detail-item">
+              <span class="label">Cash Receiver :</span>
+              <input v-model="editableData.cashReceiver" class="edit-input bold-val" placeholder="-" />
+            </div>
 
             <div class="detail-item full-row">
               <span class="label">Cheque (No. ) :</span>
@@ -189,6 +192,7 @@ const editableData = ref({
   mobile: props.data.mobile || '98987 04977',
   ownerOrResident: props.data.ownerOrResident || 'OWNER',
   paymentMode: props.data.bankDetail ? 'BANK' : (props.data.cashReceiver ? 'CASH' : 'BANK'),
+  cashReceiver: props.data.cashReceiver || '',
   chequeNo: '',
   baseAmount: Number(props.data.amount) || 5700,
   arrears: 0,

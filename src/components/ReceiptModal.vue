@@ -37,7 +37,9 @@
             </div>
 
             <div class="date-block">
-              <strong>DATE :</strong> <input v-model="editableData.date" class="edit-input-inline" />
+              <strong>DATE :</strong> 
+              <span v-if="isExportingPdf" class="pdf-export-val">{{ editableData.date }}</span>
+              <input v-else v-model="editableData.date" class="edit-input-inline" />
             </div>
           </div>
 
@@ -50,40 +52,48 @@
           <div class="details-grid">
             <div class="detail-item">
               <span class="label">Flat / Shop No. :</span>
-              <input v-model="editableData.flatNumber" class="edit-input bold-val" />
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.flatNumber }}</span>
+              <input v-else v-model="editableData.flatNumber" class="edit-input bold-val" />
             </div>
             <div class="detail-item">
               <span class="label">Maintenance Period :</span>
-              <input v-model="editableData.period" class="edit-input bold-val" />
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.period }}</span>
+              <input v-else v-model="editableData.period" class="edit-input bold-val" />
             </div>
 
             <div class="detail-item">
               <span class="label">Member Name :</span>
-              <input v-model="editableData.name" class="edit-input bold-val" />
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.name }}</span>
+              <input v-else v-model="editableData.name" class="edit-input bold-val" />
             </div>
             <div class="detail-item">
               <span class="label">Property Type :</span>
-              <input v-model="editableData.propertyType" class="edit-input bold-val" />
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.propertyType }}</span>
+              <input v-else v-model="editableData.propertyType" class="edit-input bold-val" />
             </div>
 
             <div class="detail-item">
               <span class="label">Mobile No. :</span>
-              <input v-model="editableData.mobile" class="edit-input bold-val" />
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.mobile }}</span>
+              <input v-else v-model="editableData.mobile" class="edit-input bold-val" />
             </div>
             <div class="detail-item">
               <span class="label">Owner / Tenant :</span>
-              <input v-model="editableData.ownerOrResident" class="edit-input bold-val" />
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.ownerOrResident }}</span>
+              <input v-else v-model="editableData.ownerOrResident" class="edit-input bold-val" />
             </div>
 
             <div class="detail-item">
               <span class="label">Payment Mode :</span>
-              <input v-model="editableData.paymentMode" class="edit-input bold-val" />
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.paymentMode }}</span>
+              <input v-else v-model="editableData.paymentMode" class="edit-input bold-val" />
             </div>
             <div class="detail-item"></div>
 
             <div class="detail-item full-row">
               <span class="label">Cheque (No. ) :</span>
-              <input v-model="editableData.chequeNo" class="edit-input bold-val" />
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.chequeNo }}</span>
+              <input v-else v-model="editableData.chequeNo" class="edit-input bold-val" />
             </div>
           </div>
 
@@ -100,12 +110,18 @@
               <tr>
                 <td>1</td>
                 <td>Maintenance Charges</td>
-                <td style="text-align: right;"><input v-model.number="editableData.baseAmount" type="number" class="edit-input-num bold-val" /></td>
+                <td style="text-align: right;">
+                  <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.baseAmount }}</span>
+                  <input v-else v-model.number="editableData.baseAmount" type="number" class="edit-input-num bold-val" />
+                </td>
               </tr>
               <tr>
                 <td>2</td>
                 <td>Arrears (If Any)</td>
-                <td style="text-align: right;"><input v-model.number="editableData.arrears" type="number" class="edit-input-num bold-val" /></td>
+                <td style="text-align: right;">
+                  <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.arrears }}</span>
+                  <input v-else v-model.number="editableData.arrears" type="number" class="edit-input-num bold-val" />
+                </td>
               </tr>
               <tr>
                 <td>3</td>
@@ -115,7 +131,10 @@
               <tr>
                 <td>4</td>
                 <td>Other Charges (If Any)</td>
-                <td style="text-align: right;"><input v-model.number="editableData.otherCharges" type="number" class="edit-input-num bold-val" /></td>
+                <td style="text-align: right;">
+                  <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.otherCharges }}</span>
+                  <input v-else v-model.number="editableData.otherCharges" type="number" class="edit-input-num bold-val" />
+                </td>
               </tr>
             </tbody>
             <tfoot>
@@ -605,6 +624,15 @@ const downloadPdf = async () => {
 .edit-input-days {
   width: 45px;
   text-align: center;
+}
+
+.pdf-export-val {
+  color: #000000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  line-height: 1.2;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* Hide input dashed borders completely when exporting PDF */

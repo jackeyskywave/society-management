@@ -98,7 +98,7 @@
               <tr>
                 <td>1</td>
                 <td>Maintenance Charges</td>
-                <td style="text-align: right;" class="bold-val">{{ data.amount || '5700' }}</td>
+                <td style="text-align: right;" class="bold-val">{{ baseAmount }}</td>
               </tr>
               <tr>
                 <td>2</td>
@@ -107,8 +107,8 @@
               </tr>
               <tr>
                 <td>3</td>
-                <td>Late Payment Charges</td>
-                <td style="text-align: right;">0</td>
+                <td>Late Payment Charges ({{ lateDaysCount }} Days @ ₹10/day)</td>
+                <td style="text-align: right;" :class="{ 'bold-val': latePaymentCharges > 0 }">{{ latePaymentCharges }}</td>
               </tr>
               <tr>
                 <td>4</td>
@@ -119,14 +119,14 @@
             <tfoot>
               <tr class="total-row">
                 <td colspan="2" style="text-align: right;" class="bold-val">TOTAL AMOUNT</td>
-                <td style="text-align: right;" class="bold-val">₹ {{ data.amount || '5700' }}</td>
+                <td style="text-align: right;" class="bold-val">₹ {{ totalAmount }}</td>
               </tr>
             </tfoot>
           </table>
 
           <!-- Amount in Words -->
           <div class="amount-words-block">
-            <strong>Amount in Words :</strong> <span class="words">Rupees Five Thousand Seven Hundred Only</span>
+            <strong>Amount in Words :</strong> <span class="words">{{ amountInWords }}</span>
           </div>
 
           <!-- Footer Note & Signatures -->
@@ -159,7 +159,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import html2pdf from 'html2pdf.js';
 
 const props = defineProps({
@@ -172,6 +172,47 @@ const props = defineProps({
 defineEmits(['close']);
 
 const receiptContainer = ref(null);
+
+// Late payment calculation logic: 1 Day = Rs. 10
+const lateDaysCount = computed(() => {
+  const days = Number(props.data.lateDays);
+  return isNaN(days) ? 0 : days;
+});
+
+const latePaymentCharges = computed(() => {
+  return lateDaysCount.value * 10;
+});
+
+const baseAmount = computed(() => {
+  const amt = Number(props.data.amount);
+  return isNaN(amt) ? 5700 : amt;
+});
+
+const totalAmount = computed(() => {
+  return baseAmount.value + latePaymentCharges.value;
+});
+
+// Helper function to convert numeric amount to words
+const numberToWords = (num) => {
+  if (!num || isNaN(num)) return 'Zero';
+  const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+  const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  
+  if ((num = num.toString()).length > 9) return 'Overflow';
+  const n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+  if (!n) return '';
+  let str = '';
+  str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+  str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+  str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+  str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+  str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+  return str.trim();
+};
+
+const amountInWords = computed(() => {
+  return `Rupees ${numberToWords(totalAmount.value)} Only`;
+});
 
 const downloadPdf = () => {
   const element = receiptContainer.value;

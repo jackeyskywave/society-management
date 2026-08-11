@@ -285,11 +285,17 @@ const downloadPdf = () => {
   overflow: hidden;
 }
 
+.btn-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .modal-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 1.75rem;
   background-color: #0f172a;
   border-bottom: 1px solid #334155;
   color: #fff;

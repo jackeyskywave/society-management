@@ -130,7 +130,10 @@
               <tr>
                 <td>3</td>
                 <td>Late Payment Charges</td>
-                <td style="text-align: right;" class="bold-val">{{ latePaymentCharges }}</td>
+                <td style="text-align: right;">
+                  <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.lateCharges }}</span>
+                  <input v-else v-model.number="editableData.lateCharges" type="number" class="edit-input-num bold-val" />
+                </td>
               </tr>
               <tr>
                 <td>4</td>
@@ -218,6 +221,7 @@ const editableData = ref({
   baseAmount: Number(props.data.amount) || 5700,
   arrears: 0,
   lateDays: Number(props.data.lateDays) || 0,
+  lateCharges: (Number(props.data.lateDays) || 0) * 10,
   otherCharges: 0
 });
 
@@ -230,15 +234,6 @@ onMounted(() => {
 });
 
 // Dynamic calculations based on editable state
-const lateDaysCount = computed(() => {
-  const days = Number(editableData.value.lateDays);
-  return isNaN(days) ? 0 : days;
-});
-
-const latePaymentCharges = computed(() => {
-  return lateDaysCount.value * 10;
-});
-
 const baseAmount = computed(() => {
   const amt = Number(editableData.value.baseAmount);
   return isNaN(amt) ? 0 : amt;
@@ -246,8 +241,9 @@ const baseAmount = computed(() => {
 
 const totalAmount = computed(() => {
   const arrears = Number(editableData.value.arrears) || 0;
+  const late = Number(editableData.value.lateCharges) || 0;
   const other = Number(editableData.value.otherCharges) || 0;
-  return baseAmount.value + latePaymentCharges.value + arrears + other;
+  return baseAmount.value + late + arrears + other;
 });
 
 // Helper function to convert numeric amount to words

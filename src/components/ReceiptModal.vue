@@ -252,18 +252,20 @@ const isExportingPdf = ref(false);
 
 const downloadPdf = async () => {
   isExportingPdf.value = true;
-  await new Promise(resolve => setTimeout(resolve, 50));
+  await new Promise(resolve => setTimeout(resolve, 100));
   
   const element = receiptContainer.value;
   const opt = {
     margin: 0,
     filename: `Receipt_${props.data.flatNumber || 'A-101'}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
+    image: { type: 'jpeg', quality: 1.0 },
     html2canvas: { 
-      scale: 2, 
+      scale: 3, 
       useCORS: true,
+      letterRendering: true,
       scrollX: 0,
-      scrollY: 0
+      scrollY: 0,
+      logging: false
     },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
@@ -615,7 +617,8 @@ const downloadPdf = async () => {
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 !important;
-  height: auto !important;
-  line-height: 1.2 !important;
+  height: 20px !important;
+  line-height: 20px !important;
+  font-weight: 700 !important;
 }
 </style>

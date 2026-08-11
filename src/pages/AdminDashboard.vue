@@ -267,11 +267,6 @@ const loadFromStorage = () => {
 
 onMounted(() => {
   loadFromStorage();
-  if (ledgerData.value.length === 0) {
-    const defaultRows = generateSampleParsedRows();
-    ledgerData.value = defaultRows;
-    saveToStorage(defaultRows);
-  }
 });
 
 const saveToStorage = (data) => {
@@ -290,8 +285,12 @@ const triggerFileInput = () => {
 
 const clearLedgerData = () => {
   ledgerData.value = [];
-  localStorage.removeItem(STORAGE_KEY);
-  showStatus('Data cleared successfully.', 'info');
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    console.error(e);
+  }
+  showStatus('Ledger data cleared successfully.', 'info');
 };
 
 const showStatus = (msg, type = 'info') => {

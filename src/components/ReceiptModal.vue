@@ -109,7 +109,7 @@
               </tr>
               <tr>
                 <td>3</td>
-                <td>Late Payment Charges (<input v-model.number="editableData.lateDays" type="number" class="edit-input-days bold-val" /> Days @ ₹10/day)</td>
+                <td>Late Payment Charges</td>
                 <td style="text-align: right;" :class="{ 'bold-val': latePaymentCharges > 0 }">{{ latePaymentCharges }}</td>
               </tr>
               <tr>

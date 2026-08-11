@@ -355,6 +355,24 @@ const downloadPdf = async () => {
   z-index: 10;
 }
 
+.modal-actions .btn-secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-actions .btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 .modal-actions .btn-primary {
   background-color: #6366f1;
   color: #ffffff !important;

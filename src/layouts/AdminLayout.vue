@@ -286,4 +286,14 @@ const handleLogout = () => {
     z-index: 99;
   }
 }
+
+@media print {
+  body > #app > .admin-layout > .main-wrapper,
+  .sidebar,
+  .header,
+  .action-card,
+  .table-card {
+    display: none !important;
+  }
+}
 </style>

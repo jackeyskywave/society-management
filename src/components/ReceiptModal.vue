@@ -4,6 +4,14 @@
       <div class="modal-actions">
         <h3>Maintenance Receipt Preview</h3>
         <div class="btn-group">
+          <button class="btn btn-secondary" @click="printReceipt">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span>Print Receipt</span>
+          </button>
           <button class="btn btn-primary" @click="downloadPdf">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -269,6 +277,13 @@ const amountInWords = computed(() => {
 });
 
 const isExportingPdf = ref(false);
+
+const printReceipt = async () => {
+  isExportingPdf.value = true;
+  await new Promise(resolve => setTimeout(resolve, 100));
+  window.print();
+  isExportingPdf.value = false;
+};
 
 const downloadPdf = async () => {
   isExportingPdf.value = true;
@@ -651,5 +666,31 @@ const downloadPdf = async () => {
   height: 20px !important;
   line-height: 20px !important;
   font-weight: 700 !important;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt-paper, .receipt-paper * {
+    visibility: visible;
+  }
+  .receipt-paper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    border: 2px solid #c59b27 !important;
+    box-shadow: none !important;
+  }
+  .receipt-modal-backdrop, .receipt-paper-wrapper {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  .modal-actions {
+    display: none !important;
+  }
 }
 </style>

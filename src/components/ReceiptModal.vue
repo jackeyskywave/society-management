@@ -449,8 +449,10 @@ const downloadPdf = async () => {
 }
 
 .detail-item .label {
-  width: 140px;
-  color: #333;
+  width: 145px;
+  color: #000000;
+  font-weight: 800;
+  flex-shrink: 0;
 }
 
 .detail-item .value {

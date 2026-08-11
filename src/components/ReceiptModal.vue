@@ -37,7 +37,7 @@
             </div>
 
             <div class="date-block">
-              <strong>DATE :</strong> {{ data.date || '15/04/2026' }}
+              <strong>DATE :</strong> <input v-model="editableData.date" class="edit-input-inline" />
             </div>
           </div>
 
@@ -50,40 +50,40 @@
           <div class="details-grid">
             <div class="detail-item">
               <span class="label">Flat / Shop No. :</span>
-              <span class="value">{{ data.flatNumber || 'A-101' }}</span>
+              <input v-model="editableData.flatNumber" class="edit-input" />
             </div>
             <div class="detail-item">
               <span class="label">Maintenance Period :</span>
-              <span class="value bold-val">{{ data.period || 'APRIL 2026 TO JUNE 2026 (Q1)' }}</span>
+              <input v-model="editableData.period" class="edit-input bold-val" />
             </div>
 
             <div class="detail-item">
               <span class="label">Member Name :</span>
-              <span class="value">{{ data.name || 'Umangbhai Suthar' }}</span>
+              <input v-model="editableData.name" class="edit-input" />
             </div>
             <div class="detail-item">
               <span class="label">Property Type :</span>
-              <span class="value">FLAT</span>
+              <input v-model="editableData.propertyType" class="edit-input" />
             </div>
 
             <div class="detail-item">
               <span class="label">Mobile No. :</span>
-              <span class="value">{{ data.mobile || '98987 04977' }}</span>
+              <input v-model="editableData.mobile" class="edit-input" />
             </div>
             <div class="detail-item">
               <span class="label">Owner / Tenant :</span>
-              <span class="value">{{ data.ownerOrResident || 'OWNER' }}</span>
+              <input v-model="editableData.ownerOrResident" class="edit-input" />
             </div>
 
             <div class="detail-item">
               <span class="label">Payment Mode :</span>
-              <span class="value">{{ data.bankDetail ? 'BANK' : (data.cashReceiver ? 'CASH' : 'BANK') }}</span>
+              <input v-model="editableData.paymentMode" class="edit-input" />
             </div>
             <div class="detail-item"></div>
 
             <div class="detail-item full-row">
               <span class="label">Cheque (No. ) :</span>
-              <span class="value"></span>
+              <input v-model="editableData.chequeNo" class="edit-input" />
             </div>
           </div>
 
@@ -100,22 +100,22 @@
               <tr>
                 <td>1</td>
                 <td>Maintenance Charges</td>
-                <td style="text-align: right;" class="bold-val">{{ baseAmount }}</td>
+                <td style="text-align: right;"><input v-model.number="editableData.baseAmount" type="number" class="edit-input-num bold-val" /></td>
               </tr>
               <tr>
                 <td>2</td>
                 <td>Arrears (If Any)</td>
-                <td style="text-align: right;">0</td>
+                <td style="text-align: right;"><input v-model.number="editableData.arrears" type="number" class="edit-input-num" /></td>
               </tr>
               <tr>
                 <td>3</td>
-                <td>Late Payment Charges ({{ lateDaysCount }} Days @ ₹10/day)</td>
+                <td>Late Payment Charges (<input v-model.number="editableData.lateDays" type="number" class="edit-input-days" /> Days @ ₹10/day)</td>
                 <td style="text-align: right;" :class="{ 'bold-val': latePaymentCharges > 0 }">{{ latePaymentCharges }}</td>
               </tr>
               <tr>
                 <td>4</td>
                 <td>Other Charges (If Any)</td>
-                <td style="text-align: right;">0</td>
+                <td style="text-align: right;"><input v-model.number="editableData.otherCharges" type="number" class="edit-input-num" /></td>
               </tr>
             </tbody>
             <tfoot>
@@ -179,6 +179,23 @@ defineEmits(['close']);
 
 const receiptContainer = ref(null);
 
+// Reactive state for editable fields inside receipt template
+const editableData = ref({
+  date: props.data.date || '15/04/2026',
+  flatNumber: props.data.flatNumber || 'A-101',
+  period: props.data.period || 'APRIL 2026 TO JUNE 2026 (Q1)',
+  name: props.data.name || 'Umangbhai Suthar',
+  propertyType: 'FLAT',
+  mobile: props.data.mobile || '98987 04977',
+  ownerOrResident: props.data.ownerOrResident || 'OWNER',
+  paymentMode: props.data.bankDetail ? 'BANK' : (props.data.cashReceiver ? 'CASH' : 'BANK'),
+  chequeNo: '',
+  baseAmount: Number(props.data.amount) || 5700,
+  arrears: 0,
+  lateDays: Number(props.data.lateDays) || 0,
+  otherCharges: 0
+});
+
 onMounted(() => {
   if (props.autoDownload) {
     setTimeout(() => {
@@ -187,9 +204,9 @@ onMounted(() => {
   }
 });
 
-// Late payment calculation logic: 1 Day = Rs. 10
+// Dynamic calculations based on editable state
 const lateDaysCount = computed(() => {
-  const days = Number(props.data.lateDays);
+  const days = Number(editableData.value.lateDays);
   return isNaN(days) ? 0 : days;
 });
 
@@ -198,12 +215,14 @@ const latePaymentCharges = computed(() => {
 });
 
 const baseAmount = computed(() => {
-  const amt = Number(props.data.amount);
-  return isNaN(amt) ? 5700 : amt;
+  const amt = Number(editableData.value.baseAmount);
+  return isNaN(amt) ? 0 : amt;
 });
 
 const totalAmount = computed(() => {
-  return baseAmount.value + latePaymentCharges.value;
+  const arrears = Number(editableData.value.arrears) || 0;
+  const other = Number(editableData.value.otherCharges) || 0;
+  return baseAmount.value + latePaymentCharges.value + arrears + other;
 });
 
 // Helper function to convert numeric amount to words
@@ -513,5 +532,47 @@ const downloadPdf = () => {
 .sig-label {
   font-size: 10px;
   color: #333;
+}
+
+/* Editable Template Input Styles */
+.edit-input, .edit-input-inline, .edit-input-num, .edit-input-days {
+  background: transparent;
+  border: 1px dashed #cbd5e1;
+  border-radius: 3px;
+  color: #000000;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  padding: 1px 4px;
+  transition: border-color 0.2s ease;
+}
+
+.edit-input:hover, .edit-input-inline:hover, .edit-input-num:hover, .edit-input-days:hover {
+  border-color: #c59b27;
+  background-color: #fffdf5;
+}
+
+.edit-input:focus, .edit-input-inline:focus, .edit-input-num:focus, .edit-input-days:focus {
+  outline: none;
+  border: 1px solid #c59b27;
+  background-color: #ffffff;
+}
+
+.edit-input {
+  width: 100%;
+}
+
+.edit-input-inline {
+  width: 90px;
+}
+
+.edit-input-num {
+  width: 80px;
+  text-align: right;
+}
+
+.edit-input-days {
+  width: 45px;
+  text-align: center;
 }
 </style>

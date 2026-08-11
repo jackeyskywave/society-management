@@ -388,11 +388,11 @@ const parseLinesToStructuredData = (lines) => {
         currentRecord.amount = text;
       } else if (text.startsWith('CASH') || text.startsWith('Cash') || text.toLowerCase().includes('cash deposit')) {
         currentRecord.cashReceiver = text;
-      } else if (text.includes('ADC') || text.includes('ICICI') || text.includes('HDFC') || text.includes('CHQ') || text.includes('yearly') || text.toLowerCase().includes('screen shot') || text.toLowerCase().includes('deposit') || text.toLowerCase().includes('shared')) {
-        if (currentRecord.bankDetail) {
-          currentRecord.bankDetail += ' ' + text;
-        } else {
+      } else if (text.includes('ADC') || text.includes('ICICI') || text.includes('HDFC') || text.includes('CHQ') || text.includes('yearly') || text.toLowerCase().includes('screen shot') || text.toLowerCase().includes('shared')) {
+        if (!currentRecord.bankDetail || currentRecord.bankDetail === 'ADC') {
           currentRecord.bankDetail = text;
+        } else if (!currentRecord.bankDetail.includes(text)) {
+          currentRecord.bankDetail += ' ' + text;
         }
       } else if (/^\d{1,3}$/.test(text) && Number(text) <= 365) {
         currentRecord.lateDays = text;

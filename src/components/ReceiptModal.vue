@@ -279,7 +279,10 @@ const amountInWords = computed(() => {
 const isExportingPdf = ref(false);
 
 const printReceipt = async () => {
-  await downloadPdf();
+  isExportingPdf.value = true;
+  await new Promise(resolve => setTimeout(resolve, 100));
+  window.print();
+  isExportingPdf.value = false;
 };
 
 const downloadPdf = async () => {

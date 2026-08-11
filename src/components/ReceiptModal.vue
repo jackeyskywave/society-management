@@ -50,7 +50,7 @@
           <div class="details-grid">
             <div class="detail-item">
               <span class="label">Flat / Shop No. :</span>
-              <input v-model="editableData.flatNumber" class="edit-input" />
+              <input v-model="editableData.flatNumber" class="edit-input bold-val" />
             </div>
             <div class="detail-item">
               <span class="label">Maintenance Period :</span>
@@ -59,31 +59,31 @@
 
             <div class="detail-item">
               <span class="label">Member Name :</span>
-              <input v-model="editableData.name" class="edit-input" />
+              <input v-model="editableData.name" class="edit-input bold-val" />
             </div>
             <div class="detail-item">
               <span class="label">Property Type :</span>
-              <input v-model="editableData.propertyType" class="edit-input" />
+              <input v-model="editableData.propertyType" class="edit-input bold-val" />
             </div>
 
             <div class="detail-item">
               <span class="label">Mobile No. :</span>
-              <input v-model="editableData.mobile" class="edit-input" />
+              <input v-model="editableData.mobile" class="edit-input bold-val" />
             </div>
             <div class="detail-item">
               <span class="label">Owner / Tenant :</span>
-              <input v-model="editableData.ownerOrResident" class="edit-input" />
+              <input v-model="editableData.ownerOrResident" class="edit-input bold-val" />
             </div>
 
             <div class="detail-item">
               <span class="label">Payment Mode :</span>
-              <input v-model="editableData.paymentMode" class="edit-input" />
+              <input v-model="editableData.paymentMode" class="edit-input bold-val" />
             </div>
             <div class="detail-item"></div>
 
             <div class="detail-item full-row">
               <span class="label">Cheque (No. ) :</span>
-              <input v-model="editableData.chequeNo" class="edit-input" />
+              <input v-model="editableData.chequeNo" class="edit-input bold-val" />
             </div>
           </div>
 
@@ -105,17 +105,17 @@
               <tr>
                 <td>2</td>
                 <td>Arrears (If Any)</td>
-                <td style="text-align: right;"><input v-model.number="editableData.arrears" type="number" class="edit-input-num" /></td>
+                <td style="text-align: right;"><input v-model.number="editableData.arrears" type="number" class="edit-input-num bold-val" /></td>
               </tr>
               <tr>
                 <td>3</td>
-                <td>Late Payment Charges (<input v-model.number="editableData.lateDays" type="number" class="edit-input-days" /> Days @ ₹10/day)</td>
+                <td>Late Payment Charges (<input v-model.number="editableData.lateDays" type="number" class="edit-input-days bold-val" /> Days @ ₹10/day)</td>
                 <td style="text-align: right;" :class="{ 'bold-val': latePaymentCharges > 0 }">{{ latePaymentCharges }}</td>
               </tr>
               <tr>
                 <td>4</td>
                 <td>Other Charges (If Any)</td>
-                <td style="text-align: right;"><input v-model.number="editableData.otherCharges" type="number" class="edit-input-num" /></td>
+                <td style="text-align: right;"><input v-model.number="editableData.otherCharges" type="number" class="edit-input-num bold-val" /></td>
               </tr>
             </tbody>
             <tfoot>
@@ -556,10 +556,13 @@ const downloadPdf = async () => {
   border: 1px dashed #cbd5e1;
   border-radius: 3px;
   color: #000000;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
   padding: 1px 4px;
+  box-sizing: border-box;
+  vertical-align: middle;
   transition: border-color 0.2s ease;
 }
 
@@ -575,7 +578,7 @@ const downloadPdf = async () => {
 }
 
 .edit-input {
-  width: 100%;
+  width: calc(100% - 145px);
 }
 
 .edit-input-inline {
@@ -602,5 +605,6 @@ const downloadPdf = async () => {
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 !important;
+  line-height: inherit !important;
 }
 </style>

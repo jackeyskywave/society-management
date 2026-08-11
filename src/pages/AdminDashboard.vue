@@ -284,8 +284,8 @@ const parsePdfContent = async (arrayBuffer) => {
 };
 
 const parseLinesToStructuredData = (lines) => {
-  // Regex patterns to identify flat numbers and mobile numbers
-  const flatRegex = /^[A-Z]-\d{3}$/i;
+  // Regex to match block flat/shop numbers e.g. A-101, B-102, Shop 1, Shop-10
+  const flatRegex = /^(?:[A-Z]-\d{3,4}|Shop\s*\d{1,2})$/i;
   const mobileRegex = /^\d{10}$|^\d{5}\s\d{5}$/;
   const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
 
@@ -301,7 +301,7 @@ const parseLinesToStructuredData = (lines) => {
       }
       currentRecord = {
         flatNumber: text.toUpperCase(),
-        name: lines[i + 1] || 'Resident',
+        name: lines[i + 1] && !flatRegex.test(lines[i + 1]) ? lines[i + 1] : 'Resident',
         mobile: '',
         ownerOrResident: 'OWNER',
         date: '15/04/2026',
@@ -313,14 +313,18 @@ const parseLinesToStructuredData = (lines) => {
     } else if (currentRecord) {
       if (mobileRegex.test(text)) {
         currentRecord.mobile = text;
-      } else if (text.toUpperCase() === 'OWNER' || text.toUpperCase() === 'TENANT') {
+      } else if (text.toUpperCase() === 'OWNER' || text.toUpperCase() === 'RENTED' || text.toUpperCase() === 'TENANT') {
         currentRecord.ownerOrResident = text.toUpperCase();
       } else if (dateRegex.test(text)) {
         currentRecord.date = text;
-      } else if (text.startsWith('CASH')) {
+      } else if (/^\d{4,6}$/.test(text) && Number(text) > 1000) {
+        currentRecord.amount = text;
+      } else if (text.startsWith('CASH') || text.startsWith('Cash')) {
         currentRecord.cashReceiver = text;
-      } else if (text === 'ADC' || text === 'ICICI' || text === 'HDFC') {
+      } else if (text.includes('ADC') || text.includes('ICICI') || text.includes('HDFC') || text.includes('CHQ')) {
         currentRecord.bankDetail = text;
+      } else if (/^\d{1,3}$/.test(text) && Number(text) <= 365) {
+        currentRecord.lateDays = text;
       }
     }
   }

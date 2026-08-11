@@ -284,8 +284,8 @@ const parsePdfContent = async (arrayBuffer) => {
 };
 
 const parseLinesToStructuredData = (lines) => {
-  // Regex to match block flat/shop numbers e.g. A-101, B-102, Shop 1, Shop-10
-  const flatRegex = /^(?:[A-Z]-\d{3,4}|Shop\s*\d{1,2})$/i;
+  // Matches A-101, B-101, Shop 1, Shop 10, Shop-1
+  const flatRegex = /^(?:[A-Z]-\d{3,4}|Shop\s*\d{1,2}|Shop-\d{1,2})$/i;
   const mobileRegex = /^\d{10}$|^\d{5}\s\d{5}$/;
   const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
 
@@ -305,7 +305,7 @@ const parseLinesToStructuredData = (lines) => {
         mobile: '',
         ownerOrResident: 'OWNER',
         date: '15/04/2026',
-        amount: '5700',
+        amount: text.toUpperCase().startsWith('SHOP') ? '12000' : '5700',
         cashReceiver: '',
         bankDetail: 'ADC',
         lateDays: '0'
@@ -321,7 +321,7 @@ const parseLinesToStructuredData = (lines) => {
         currentRecord.amount = text;
       } else if (text.startsWith('CASH') || text.startsWith('Cash')) {
         currentRecord.cashReceiver = text;
-      } else if (text.includes('ADC') || text.includes('ICICI') || text.includes('HDFC') || text.includes('CHQ')) {
+      } else if (text.includes('ADC') || text.includes('ICICI') || text.includes('HDFC') || text.includes('CHQ') || text.includes('yearly')) {
         currentRecord.bankDetail = text;
       } else if (/^\d{1,3}$/.test(text) && Number(text) <= 365) {
         currentRecord.lateDays = text;

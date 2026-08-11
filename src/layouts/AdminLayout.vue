@@ -88,7 +88,9 @@ const isMobileMenuOpen = ref(false);
 
 const handleLogout = () => {
   authService.logout();
-  router.push('/login');
+  router.push('/login').catch(() => {
+    window.location.href = '/society-management/login';
+  });
 };
 </script>
 

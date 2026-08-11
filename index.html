@@ -4,8 +4,24 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/society-management/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>society-management</title>
-    <script type="module" crossorigin src="/society-management/assets/index-BGi7f6G1.js"></script>
+    <title>Society Management Admin</title>
+    <script type="text/javascript">
+      (function(l) {
+        if (l.search[1] === 'p') {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&') 
+          }).filter(function(s) { 
+            return s.slice(0, 2) === 'p=' 
+          })[0].slice(2);
+          if (decoded) {
+            window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + (decoded ? '/' + decoded : '') + l.hash
+            );
+          }
+        }
+      }(window.location));
+    </script>
+    <script type="module" crossorigin src="/society-management/assets/index-CK4Wnp4P.js"></script>
     <link rel="stylesheet" crossorigin href="/society-management/assets/index-eyHp0jfB.css">
   </head>
   <body>

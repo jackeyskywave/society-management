@@ -286,4 +286,12 @@ const handleLogout = () => {
     z-index: 99;
   }
 }
+
+@media print {
+  .header,
+  .sidebar,
+  .main-wrapper {
+    display: none !important;
+  }
+}
 </style>

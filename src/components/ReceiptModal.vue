@@ -277,10 +277,21 @@ const downloadPdf = () => {
   z-index: 10;
 }
 
-.btn-group {
-  display: flex;
+.modal-actions .btn-primary {
+  background-color: var(--primary);
+  color: #ffffff !important;
+  border: 1px solid var(--primary-hover);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: inline-flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+}
+
+.modal-actions .btn-primary:hover {
+  background-color: var(--primary-hover);
 }
 
 .btn-close {

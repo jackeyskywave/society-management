@@ -188,7 +188,7 @@ const editableData = ref({
   propertyType: 'FLAT',
   mobile: props.data.mobile || '98987 04977',
   ownerOrResident: props.data.ownerOrResident || 'OWNER',
-  paymentMode: props.data.bankDetail ? 'BANK' : (props.data.cashReceiver ? 'CASH' : 'BANK'),
+  paymentMode: props.data.paymentMode || (props.data.cashReceiver && props.data.cashReceiver.trim() ? 'CASH' : (props.data.bankDetail ? 'BANK' : 'CASH')),
   cashReceiver: props.data.cashReceiver || '',
   chequeNo: '',
   baseAmount: Number(props.data.amount) || 5700,

@@ -37,9 +37,9 @@
             </div>
 
             <div class="date-block">
-              <strong>DATE :</strong> 
-              <span v-if="isExportingPdf" class="pdf-export-val">{{ editableData.date }}</span>
-              <input v-else v-model="editableData.date" class="edit-input-inline" />
+              <strong>DATE :&nbsp;</strong> 
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.date }}</span>
+              <input v-else v-model="editableData.date" class="edit-input-inline bold-val" />
             </div>
           </div>
 
@@ -447,7 +447,9 @@ const downloadPdf = async () => {
 
 .date-block {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
 }
 
 .section-banner {

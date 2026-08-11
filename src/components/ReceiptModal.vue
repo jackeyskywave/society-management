@@ -23,7 +23,7 @@
 
       <!-- Exact PDF Template Container -->
       <div class="receipt-paper-wrapper">
-        <div ref="receiptContainer" class="receipt-paper">
+        <div ref="receiptContainer" class="receipt-paper" :class="{ 'exporting-pdf': isExportingPdf }">
           <!-- Header Logo & Title -->
           <div class="receipt-header">
             <div class="logo-box">
@@ -247,7 +247,12 @@ const amountInWords = computed(() => {
   return `Rupees ${numberToWords(totalAmount.value)} Only`;
 });
 
-const downloadPdf = () => {
+const isExportingPdf = ref(false);
+
+const downloadPdf = async () => {
+  isExportingPdf.value = true;
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
   const element = receiptContainer.value;
   const opt = {
     margin: [0.3, 0.3, 0.3, 0.3],
@@ -256,7 +261,12 @@ const downloadPdf = () => {
     html2canvas: { scale: 2, useCORS: true },
     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
   };
-  html2pdf().set(opt).from(element).save();
+  
+  try {
+    await html2pdf().set(opt).from(element).save();
+  } finally {
+    isExportingPdf.value = false;
+  }
 };
 </script>
 
@@ -580,5 +590,17 @@ const downloadPdf = () => {
 .edit-input-days {
   width: 45px;
   text-align: center;
+}
+
+/* Hide input dashed borders completely when exporting PDF */
+.receipt-paper.exporting-pdf .edit-input,
+.receipt-paper.exporting-pdf .edit-input-inline,
+.receipt-paper.exporting-pdf .edit-input-num,
+.receipt-paper.exporting-pdf .edit-input-days {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 </style>

@@ -126,7 +126,7 @@
               <tr>
                 <td>3</td>
                 <td>Late Payment Charges</td>
-                <td style="text-align: right;" :class="{ 'bold-val': latePaymentCharges > 0 }">{{ latePaymentCharges }}</td>
+                <td style="text-align: right;" class="bold-val">{{ latePaymentCharges }}</td>
               </tr>
               <tr>
                 <td>4</td>

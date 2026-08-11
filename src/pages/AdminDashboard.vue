@@ -379,7 +379,7 @@ const parseLinesToStructuredData = (lines) => {
         date: '15/04/2026',
         amount: text.toUpperCase().startsWith('SHOP') ? '12000' : '5700',
         cashReceiver: '',
-        bankDetail: 'ADC',
+        bankDetail: '',
         lateDays: '0'
       };
     } else if (currentRecord) {
@@ -394,7 +394,7 @@ const parseLinesToStructuredData = (lines) => {
       } else if (text.startsWith('CASH') || text.startsWith('Cash') || text.toLowerCase().includes('cash deposit')) {
         currentRecord.cashReceiver = text;
       } else if (text.includes('ADC') || text.includes('ICICI') || text.includes('HDFC') || text.includes('CHQ') || text.includes('yearly') || text.toLowerCase().includes('screen shot') || text.toLowerCase().includes('shared')) {
-        if (!currentRecord.bankDetail || currentRecord.bankDetail === 'ADC') {
+        if (!currentRecord.bankDetail) {
           currentRecord.bankDetail = text;
         } else if (!currentRecord.bankDetail.includes(text)) {
           currentRecord.bankDetail += ' ' + text;
@@ -404,6 +404,13 @@ const parseLinesToStructuredData = (lines) => {
       }
     }
   }
+
+  // Post-process default fallback for records without cashReceiver or bankDetail
+  rows.forEach(r => {
+    if (!r.cashReceiver && !r.bankDetail) {
+      r.bankDetail = 'ADC';
+    }
+  });
 
   if (currentRecord && currentRecord.flatNumber) {
     rows.push(currentRecord);

@@ -366,9 +366,14 @@ const parseLinesToStructuredData = (lines) => {
       if (currentRecord && currentRecord.flatNumber) {
         rows.push(currentRecord);
       }
+      const nextLine = lines[i + 1];
+      const isNextMobile = nextLine && mobileRegex.test(nextLine);
+      const isNextFlat = nextLine && flatRegex.test(nextLine);
+      const nameVal = (nextLine && !isNextMobile && !isNextFlat) ? nextLine : '';
+
       currentRecord = {
         flatNumber: text.toUpperCase(),
-        name: lines[i + 1] && !flatRegex.test(lines[i + 1]) ? lines[i + 1] : 'Resident',
+        name: nameVal,
         mobile: '',
         ownerOrResident: 'OWNER',
         date: '15/04/2026',

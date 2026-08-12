@@ -355,104 +355,102 @@ const handleFileUpload = async (event) => {
   }
 };
 
+// Column X-boundary map (derived from PDF layout analysis).
+// Each item's x0 falls into exactly one column bucket.
+const COLUMN_BOUNDS = [
+  { key: 'flatNumber',      min: 55,  max: 108 },
+  { key: 'name',            min: 108, max: 175 },
+  { key: 'mobile',          min: 175, max: 245 },
+  { key: 'ownerOrResident', min: 245, max: 290 },
+  { key: 'date',            min: 290, max: 330 },
+  { key: 'amount',          min: 330, max: 360 },
+  { key: 'cashReceiver',    min: 360, max: 405 },
+  { key: 'bankDetail',      min: 405, max: 450 },
+  { key: 'lateDays',        min: 450, max: 999 },
+];
+
+const FLAT_REGEX = /^(?:[A-Z]-?\d{2,4}|Shop\s*-?\s*\d{1,2})$/i;
+const ROW_TOLERANCE = 5; // y-distance in points that still counts as same row
+
 const parsePdfContent = async (arrayBuffer) => {
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let fullTextLines = [];
+  const allRecords = [];
 
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    const viewport = page.getViewport({ scale: 1 });
     const textContent = await page.getTextContent();
-    const pageLines = textContent.items.map(item => item.str.trim()).filter(Boolean);
-    fullTextLines.push(...pageLines);
-  }
 
-  const parsed = parseLinesToStructuredData(fullTextLines);
-  return parsed.length > 0 ? parsed : generateSampleParsedRows();
-};
+    // Convert every text item to {x, y-from-top, text}
+    const items = textContent.items
+      .map(it => ({
+        x: it.transform[4],
+        y: viewport.height - it.transform[5],
+        text: (it.str || '').trim(),
+      }))
+      .filter(it => it.text.length > 0);
 
-const parseLinesToStructuredData = (lines) => {
-  // Matches A-101, B-101, Shop 1, Shop 10, Shop-1
-  const flatRegex = /^(?:[A-Z]-\d{3,4}|Shop\s*\d{1,2}|Shop-\d{1,2})$/i;
-  const mobileRegex = /^\d{10}$|^\d{5}\s\d{5}$/;
-  const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
-
-  const rows = [];
-  let currentRecord = null;
-
-  for (let i = 0; i < lines.length; i++) {
-    const text = lines[i];
-
-    // Stop processing record values if we reach page summary rows
-    if (text.toUpperCase().includes('TOTAL (') || text.toUpperCase().includes('COUNT') || text.toUpperCase() === 'NUMBER' || text.toUpperCase() === 'FLAT NUMBER') {
-      if (currentRecord && currentRecord.flatNumber) {
-        rows.push(currentRecord);
-        currentRecord = null;
-      }
-      continue;
+    // Group items into y-bands (visual rows). Two items with |Δy| < TOL share a band.
+    items.sort((a, b) => a.y - b.y || a.x - b.x);
+    const bands = [];
+    for (const it of items) {
+      const band = bands.find(b => Math.abs(b.y - it.y) < ROW_TOLERANCE);
+      if (band) band.items.push(it);
+      else bands.push({ y: it.y, items: [it] });
     }
 
-    if (flatRegex.test(text)) {
-      if (currentRecord && currentRecord.flatNumber) {
-        rows.push(currentRecord);
-      }
-      currentRecord = {
-        flatNumber: text.toUpperCase(),
-        name: '',
-        mobile: '',
-        ownerOrResident: 'OWNER',
-        date: '15/04/2026',
-        amount: text.toUpperCase().startsWith('SHOP') ? '12000' : '5700',
-        cashReceiver: '',
-        bankDetail: '',
-        lateDays: '0'
-      };
-    } else if (currentRecord) {
-      if (!currentRecord.name && !mobileRegex.test(text) && text.toUpperCase() !== 'OWNER' && text.toUpperCase() !== 'RENTED' && text.toUpperCase() !== 'TENANT' && !dateRegex.test(text) && !/^\d{4,6}$/.test(text) && !text.toLowerCase().includes('cash') && !text.toLowerCase().includes('adc') && !text.toLowerCase().includes('kotak') && !text.toLowerCase().includes('paid')) {
-        currentRecord.name = text;
-      } else if (mobileRegex.test(text) || (!currentRecord.mobile && (text.startsWith('q1') || text.includes('Upto') || text.includes('baki')))) {
-        currentRecord.mobile = text;
-      } else if (text.toUpperCase() === 'OWNER' || text.toUpperCase() === 'RENTED' || text.toUpperCase() === 'TENANT') {
-        currentRecord.ownerOrResident = text.toUpperCase();
-      } else if (dateRegex.test(text)) {
-        currentRecord.date = text;
-      } else if (text === '4500' || text === '5100' || text === '6000' || text === '3000' || text === '5700' || text === '12000' || (/^\d{4,6}$/.test(text) && Number(text) > 1000 && Number(text) <= 50000)) {
-        if (!currentRecord.amount || currentRecord.amount === '5700' || currentRecord.amount === '5100' || currentRecord.amount === '12000') {
-          currentRecord.amount = text;
-        }
-      } else if (text.toLowerCase().includes('cash') || text.toLowerCase().includes('aaksas') || text.toLowerCase().includes('expense') || text.toLowerCase().includes('maintainance') || text.startsWith('CASH-') || text.startsWith('Cash-')) {
-        if (!currentRecord.cashReceiver) {
-          currentRecord.cashReceiver = text;
-        } else if (!currentRecord.cashReceiver.includes(text)) {
-          currentRecord.cashReceiver += ' ' + text;
-        }
-      } else if (text.toLowerCase() === 'q1 - adc' || text.toLowerCase() === 'q1-adc' || text.toLowerCase() === 'q1 -adc') {
-        currentRecord.mobile = text;
-      } else if (text.includes('+') || text.toLowerCase().includes('kotak') || text.toLowerCase().includes('paid') || text.toLowerCase().includes('screen shot') || text.toLowerCase().includes('main group') || text.toLowerCase().includes('new') || text.toLowerCase().includes('done') || text.toLowerCase().includes('icici') || text.toLowerCase().includes('hdfc') || text.toLowerCase().includes('chq') || text.toLowerCase().includes('yearly') || text.toLowerCase().includes('shared') || text.toLowerCase() === 'adc' || text.toLowerCase().includes('adc - old')) {
-        if ((currentRecord.mobile && currentRecord.mobile.includes(text)) || text.toLowerCase().includes('q1')) {
-          if (!currentRecord.mobile) currentRecord.mobile = text;
+    // Bands are already ordered top-to-bottom. A band that contains a flat-number
+    // token in the leftmost column starts a new record; subsequent bands without
+    // a flat number are treated as continuation lines (multi-line name, bank,
+    // cash-receiver notes) and merged into the current record.
+    // Regex matching page-footer summary rows / block headers that must NOT be
+    // merged into the last flat record on the page.
+    const SUMMARY_RE = /TOTAL\s*\(|\bCOUNT\b|<--|-->|APR-MAY|FLAT\s*NUMBER|^\s*NUMBER\s*$|^\s*NAME\s*$|^\s*MOBILE\s*$/i;
+
+    let current = null;
+    for (const band of bands) {
+      const hasFlat = band.items.some(it => it.x < 108 && FLAT_REGEX.test(it.text));
+      const bandText = band.items.map(it => it.text).join(' ');
+      if (hasFlat) {
+        if (current) allRecords.push(current);
+        current = [...band.items];
+      } else if (current) {
+        if (SUMMARY_RE.test(bandText)) {
+          // Close out the current record — everything below is footer/header noise
+          allRecords.push(current);
+          current = null;
         } else {
-          const cleanText = currentRecord.name ? text.replace(new RegExp(currentRecord.name, 'gi'), '').trim() : text;
-          if (cleanText) {
-            if (!currentRecord.bankDetail) {
-              currentRecord.bankDetail = cleanText;
-            } else if (!currentRecord.bankDetail.includes(cleanText)) {
-              currentRecord.bankDetail += ' ' + cleanText;
-            }
-          }
+          current.push(...band.items);
         }
-      } else if (/^\d{1,3}$/.test(text) && text !== currentRecord.amount) {
-        currentRecord.lateDays = text;
-      } else if (!currentRecord.mobile && text.length > 0 && !currentRecord.bankDetail && !currentRecord.cashReceiver) {
-        currentRecord.mobile = text;
       }
     }
+    if (current) allRecords.push(current);
   }
 
-  if (currentRecord && currentRecord.flatNumber) {
-    rows.push(currentRecord);
-  }
+  // Convert each record's item list into a structured row by column bucket.
+  const structured = allRecords.map(items => {
+    const row = {
+      flatNumber: '', name: '', mobile: '',
+      ownerOrResident: '', date: '', amount: '',
+      cashReceiver: '', bankDetail: '', lateDays: '',
+    };
+    for (const col of COLUMN_BOUNDS) {
+      const parts = items
+        .filter(it => it.x >= col.min && it.x < col.max)
+        .sort((a, b) => a.y - b.y || a.x - b.x)
+        .map(it => it.text);
+      row[col.key] = parts.join(' ').replace(/\s+/g, ' ').trim();
+    }
+    row.flatNumber = row.flatNumber.toUpperCase().replace(/\s+/g, ' ');
+    if (!row.lateDays) row.lateDays = '0';
+    return row;
+  }).filter(r =>
+    r.flatNumber &&
+    /^(?:[A-Z]-?\d|SHOP)/i.test(r.flatNumber) &&
+    !/TOTAL|COUNT/i.test(r.flatNumber)
+  );
 
-  return rows;
+  return structured.length > 0 ? structured : generateSampleParsedRows();
 };
 
 // Empty fallback array so no sample static data remains in codebase

@@ -39,7 +39,7 @@
             </div>
 
             <div class="society-title-block">
-              <h1 class="society-name">ARISTO BLISS CO. OP. HOU. SOCIETY</h1>
+              <h1 class="society-name">ARISTO BLISS CO OP HOUSING SER. SOCIETY LTD</h1>
               <p class="society-tagline">We Care, We Share, We Build Better Living</p>
               <p class="society-address">Aristo Bliss Society, Near Saral Residency, GOTA 382481.</p>
             </div>
@@ -99,7 +99,7 @@
             <div class="detail-item full-row-bank" style="grid-column: 1 / -1;">
               <span class="label">Bank Detail :</span>
               <div v-if="formattedBankDetail.isAdc" class="adc-details-box">
-                <div class="bold-val">Account Name: Aristo Bliss Co Op Housing Ser. Society Ltd</div>
+                <div class="bold-val">Account Name: ARISTO BLISS CO OP HOUSING SER. SOCIETY LTD</div>
                 <div class="bold-val">Account Number: 107010529250</div>
                 <div class="bold-val">IFSC Code: GSCB0ADC203</div>
                 <div v-if="formattedBankDetail.extra" class="bold-val extra-note">{{ formattedBankDetail.extra }}</div>
@@ -377,20 +377,24 @@ const downloadPdf = async () => {
   
   const element = receiptContainer.value;
   const opt = {
-    margin: [5, 5, 5, 5], // Exact 0.5 cm (5mm) margin around all 4 sides
+    margin: [4, 4, 4, 4], // 4mm margin all sides
     filename: `Receipt_${props.data.flatNumber || 'A-101'}.pdf`,
     image: { type: 'jpeg', quality: 1.0 },
-    html2canvas: { 
-      scale: 2.5, 
+    html2canvas: {
+      scale: 2.5,
       useCORS: true,
       letterRendering: true,
       scrollX: 0,
       scrollY: 0,
-      logging: false
+      logging: false,
+      windowWidth: 780,
+      windowHeight: 540
     },
-    jsPDF: { unit: 'mm', format: 'a5', orientation: 'landscape' }
+    jsPDF: { unit: 'mm', format: 'a5', orientation: 'landscape', compress: true },
+    // Force single-page output — never split the receipt
+    pagebreak: { mode: ['avoid-all'], avoid: ['.receipt-paper', 'table', 'tr'] }
   };
-  
+
   try {
     await html2pdf().set(opt).from(element).save();
   } finally {
@@ -767,10 +771,44 @@ const downloadPdf = async () => {
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 !important;
-  height: 18px !important;
-  line-height: 18px !important;
+  height: 16px !important;
+  line-height: 16px !important;
   font-weight: 700 !important;
 }
+
+/* Force single-page fit for A5 landscape export.
+   A5 landscape @ 4mm margin ≈ 202×140mm content, which at our 740px canvas
+   width is roughly 740×510px. Constrain paper + tighten spacing so nothing
+   overflows and html2pdf never triggers a second page. */
+.receipt-paper.exporting-pdf {
+  width: 740px !important;
+  height: 510px !important;
+  padding: 10px 16px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.receipt-paper.exporting-pdf .receipt-header { margin-bottom: 4px !important; }
+.receipt-paper.exporting-pdf .logo-box { width: 54px !important; height: 54px !important; }
+.receipt-paper.exporting-pdf .society-name { font-size: 14px !important; }
+.receipt-paper.exporting-pdf .society-tagline { font-size: 9px !important; margin: 0 !important; }
+.receipt-paper.exporting-pdf .society-address { font-size: 8.5px !important; }
+.receipt-paper.exporting-pdf .section-banner { padding: 3px !important; font-size: 11px !important; margin-bottom: 5px !important; }
+.receipt-paper.exporting-pdf .details-grid { row-gap: 2px !important; column-gap: 12px !important; font-size: 9.5px !important; margin-bottom: 5px !important; }
+.receipt-paper.exporting-pdf .detail-item { min-height: 14px !important; }
+.receipt-paper.exporting-pdf .detail-item .label { width: 118px !important; }
+.receipt-paper.exporting-pdf .adc-details-box > div { font-size: 9.5px !important; line-height: 1.25 !important; }
+.receipt-paper.exporting-pdf .receipt-table { font-size: 9.5px !important; margin-bottom: 4px !important; }
+.receipt-paper.exporting-pdf .receipt-table th,
+.receipt-paper.exporting-pdf .receipt-table td { padding: 3px 8px !important; }
+.receipt-paper.exporting-pdf .total-row td { font-size: 10.5px !important; }
+.receipt-paper.exporting-pdf .amount-words-block { font-size: 9.5px !important; margin-bottom: 4px !important; }
+.receipt-paper.exporting-pdf .receipt-footer { margin-top: auto !important; }
+.receipt-paper.exporting-pdf .note-box { padding: 4px 8px !important; font-size: 8px !important; width: 55% !important; }
+.receipt-paper.exporting-pdf .note-box ul li { line-height: 1.35 !important; }
+.receipt-paper.exporting-pdf .thank-you { margin-top: 2px !important; }
+.receipt-paper.exporting-pdf .sig-line { width: 100px !important; }
+.receipt-paper.exporting-pdf .sig-label { font-size: 8.5px !important; }
 
 @media print {
   @page {

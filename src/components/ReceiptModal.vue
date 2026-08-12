@@ -98,13 +98,7 @@
             </div>
             <div class="detail-item full-row-bank" style="grid-column: 1 / -1;">
               <span class="label">Bank Detail :</span>
-              <div v-if="formattedBankDetail.isAdc" class="adc-details-box">
-                <div class="bold-val">Account Name: ARISTO BLISS CO OP HOUSING SER. SOCIETY LTD</div>
-                <div class="bold-val">Account Number: 107010529250</div>
-                <div class="bold-val">IFSC Code: GSCB0ADC203</div>
-                <div v-if="formattedBankDetail.extra" class="bold-val extra-note">{{ formattedBankDetail.extra }}</div>
-              </div>
-              <span v-else-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.bankDetail || '-' }}</span>
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.bankDetail || '-' }}</span>
               <input v-else v-model="editableData.bankDetail" class="edit-input bold-val" placeholder="-" />
             </div>
           </div>

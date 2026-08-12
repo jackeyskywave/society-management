@@ -402,9 +402,12 @@ const parseLinesToStructuredData = (lines) => {
         currentRecord.amount = text;
       } else if (text.startsWith('CASH-') || text.startsWith('Cash-') || text.toLowerCase() === 'cash' || text.toLowerCase().startsWith('cash-') || text.toLowerCase() === 'cash-1' || text.toLowerCase() === 'cash-2') {
         currentRecord.cashReceiver = text;
+      } else if (text.toLowerCase() === 'q1 - adc' || text.toLowerCase() === 'q1-adc' || text.toLowerCase() === 'q1 -adc') {
+        currentRecord.mobile = text;
       } else if (text.includes('+') || text.toLowerCase().includes('kotak') || text.toLowerCase().includes('paid') || text.toLowerCase().includes('screen shot') || text.toLowerCase().includes('main group') || text.toLowerCase().includes('new') || text.toLowerCase().includes('done') || text.toLowerCase().includes('icici') || text.toLowerCase().includes('hdfc') || text.toLowerCase().includes('chq') || text.toLowerCase().includes('yearly') || text.toLowerCase().includes('shared') || text.toLowerCase() === 'adc' || text.toLowerCase().includes('adc - old')) {
-        if (currentRecord.mobile && currentRecord.mobile.includes(text)) {
-          // Do not push text to bankDetail if it's already stored in mobile
+        if ((currentRecord.mobile && currentRecord.mobile.includes(text)) || text.toLowerCase().includes('q1')) {
+          // Do not push q1 or mobile text into bankDetail
+          if (!currentRecord.mobile) currentRecord.mobile = text;
         } else {
           const cleanText = currentRecord.name ? text.replace(new RegExp(currentRecord.name, 'gi'), '').trim() : text;
           if (cleanText) {

@@ -96,16 +96,16 @@
               <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.paymentMode }}</span>
               <input v-else v-model="editableData.paymentMode" class="edit-input bold-val" />
             </div>
-            <div class="detail-item">
+            <div class="detail-item full-row-bank" style="grid-column: 1 / -1;">
               <span class="label">Bank Detail :</span>
-              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.bankDetail }}</span>
+              <div v-if="formattedBankDetail.isAdc" class="adc-details-box">
+                <div class="bold-val">Account Name: Aristo Bliss Co Op Housing Ser. Society Ltd</div>
+                <div class="bold-val">Account Number: 107010529250</div>
+                <div class="bold-val">IFSC Code: GSCB0ADC203</div>
+                <div v-if="formattedBankDetail.extra" class="bold-val extra-note">{{ formattedBankDetail.extra }}</div>
+              </div>
+              <span v-else-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.bankDetail || '-' }}</span>
               <input v-else v-model="editableData.bankDetail" class="edit-input bold-val" placeholder="-" />
-            </div>
-
-            <div class="detail-item full-row">
-              <span class="label">Cheque (No. ) :</span>
-              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.chequeNo }}</span>
-              <input v-else v-model="editableData.chequeNo" class="edit-input bold-val" />
             </div>
           </div>
 
@@ -249,6 +249,17 @@ watch(editableData, (newVal) => {
     console.error('Failed to sync edited modal data:', e);
   }
 }, { deep: true });
+
+// Computed helper to format ADC bank details into full society account info
+const formattedBankDetail = computed(() => {
+  const bd = (editableData.value.bankDetail || '').trim();
+  const isAdc = bd.toLowerCase().includes('adc');
+  let extra = '';
+  if (isAdc) {
+    extra = bd.replace(/adc/gi, '').replace(/-/g, '').replace(/old new both done/gi, 'Old & New both done').trim();
+  }
+  return { isAdc, extra };
+});
 
 onMounted(() => {
   if (props.autoDownload) {

@@ -398,7 +398,9 @@ const parseLinesToStructuredData = (lines) => {
       const nextLine = lines[i + 1];
       const isNextMobile = nextLine && mobileRegex.test(nextLine);
       const isNextFlat = nextLine && flatRegex.test(nextLine);
-      const nameVal = (nextLine && !isNextMobile && !isNextFlat) ? nextLine : '';
+      const isNextStatus = nextLine && (nextLine.toUpperCase() === 'OWNER' || nextLine.toUpperCase() === 'RENTED' || nextLine.toUpperCase() === 'TENANT');
+      const isNextDate = nextLine && dateRegex.test(nextLine);
+      const nameVal = (nextLine && !isNextMobile && !isNextFlat && !isNextStatus && !isNextDate) ? nextLine : '';
 
       currentRecord = {
         flatNumber: text.toUpperCase(),

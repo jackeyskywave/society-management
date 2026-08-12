@@ -129,14 +129,6 @@
               </tr>
               <tr>
                 <td>2</td>
-                <td>Arrears (If Any)</td>
-                <td style="text-align: right;">
-                  <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.arrears }}</span>
-                  <input v-else v-model.number="editableData.arrears" type="number" class="edit-input-num bold-val" />
-                </td>
-              </tr>
-              <tr>
-                <td>3</td>
                 <td>Late Payment Charges</td>
                 <td style="text-align: right;">
                   <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.lateCharges }}</span>
@@ -144,7 +136,7 @@
                 </td>
               </tr>
               <tr>
-                <td>4</td>
+                <td>3</td>
                 <td>Other Charges (If Any)</td>
                 <td style="text-align: right;">
                   <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.otherCharges }}</span>
@@ -227,7 +219,6 @@ const editableData = ref({
   cashReceiver: props.data.cashReceiver || '',
   chequeNo: '',
   baseAmount: Number(props.data.amount) || 5700,
-  arrears: 0,
   lateDays: Number(props.data.lateDays) || 0,
   lateCharges: (Number(props.data.lateDays) || 0) * 10,
   otherCharges: 0
@@ -248,10 +239,9 @@ const baseAmount = computed(() => {
 });
 
 const totalAmount = computed(() => {
-  const arrears = Number(editableData.value.arrears) || 0;
   const late = Number(editableData.value.lateCharges) || 0;
   const other = Number(editableData.value.otherCharges) || 0;
-  return baseAmount.value + late + arrears + other;
+  return baseAmount.value + late + other;
 });
 
 // Helper function to convert numeric amount to words
@@ -283,7 +273,7 @@ const printReceipt = async () => {
   await new Promise(resolve => setTimeout(resolve, 100));
   
   const element = receiptContainer.value;
-  const printWindow = window.open('', '_blank', 'width=850,height=1100');
+  const printWindow = window.open('', '_blank', 'width=950,height=650');
   
   if (printWindow) {
     printWindow.document.write(`
@@ -292,39 +282,39 @@ const printReceipt = async () => {
         <head>
           <title>Receipt_${editableData.value.flatNumber}</title>
           <style>
-            @page { size: A4 portrait; margin: 10mm; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            body { margin: 0; padding: 20px; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; }
-            .receipt-paper { width: 790px; margin: 0 auto; background-color: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif; padding: 30px 35px; border: 2px solid #c59b27 !important; box-sizing: border-box; }
-            .receipt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-            .logo-box { display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37 !important; padding: 2px; background-color: #ffffff !important; width: 90px; height: 90px; }
+            @page { size: A5 landscape; margin: 4mm; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
+            body { margin: 0; padding: 0; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; }
+            .receipt-paper { width: 100%; max-width: 790px; margin: 0 auto; background-color: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif; padding: 15px 20px; border: 2px solid #c59b27 !important; box-sizing: border-box; }
+            .receipt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .logo-box { display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37 !important; padding: 2px; background-color: #ffffff !important; width: 65px; height: 65px; }
             .exact-logo-img { width: 100%; height: 100%; object-fit: contain; }
             .society-title-block { text-align: center; }
-            .society-name { font-size: 18px; font-weight: 800; margin: 0; color: #111111 !important; }
-            .society-tagline { font-size: 11px; font-style: italic; margin: 2px 0; color: #444444 !important; }
-            .society-address { font-size: 10px; margin: 0; color: #555555 !important; }
-            .date-block { font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; }
-            .section-banner { background-color: #c59b27 !important; color: #ffffff !important; text-align: center; font-weight: 800; font-size: 14px; padding: 6px; letter-spacing: 1px; margin-bottom: 15px; }
-            .details-grid { display: grid; grid-template-columns: 1fr 1fr; row-gap: 8px; column-gap: 20px; font-size: 11px; margin-bottom: 15px; }
-            .detail-item { display: flex; align-items: center; min-height: 22px; }
-            .detail-item .label { width: 145px; color: #000000 !important; font-weight: 800; flex-shrink: 0; }
+            .society-name { font-size: 16px; font-weight: 800; margin: 0; color: #111111 !important; }
+            .society-tagline { font-size: 10px; font-style: italic; margin: 1px 0; color: #444444 !important; }
+            .society-address { font-size: 9px; margin: 0; color: #555555 !important; }
+            .date-block { font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; }
+            .section-banner { background-color: #c59b27 !important; color: #ffffff !important; text-align: center; font-weight: 800; font-size: 12px; padding: 4px; letter-spacing: 1px; margin-bottom: 10px; }
+            .details-grid { display: grid; grid-template-columns: 1fr 1fr; row-gap: 5px; column-gap: 15px; font-size: 10px; margin-bottom: 10px; }
+            .detail-item { display: flex; align-items: center; min-height: 18px; }
+            .detail-item .label { width: 130px; color: #000000 !important; font-weight: 800; flex-shrink: 0; }
             .bold-val { font-weight: 800; }
-            .receipt-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px; }
-            .receipt-table th { background-color: #c59b27 !important; color: #ffffff !important; padding: 6px 10px; font-weight: 800; border: 1px solid #b38a1f !important; }
-            .receipt-table td { padding: 6px 10px; border: 1px solid #e2e8f0 !important; color: #000000 !important; }
+            .receipt-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 8px; }
+            .receipt-table th { background-color: #c59b27 !important; color: #ffffff !important; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f !important; }
+            .receipt-table td { padding: 4px 8px; border: 1px solid #e2e8f0 !important; color: #000000 !important; }
             .total-row { background-color: #f7f3e8 !important; }
-            .total-row td { border-top: 2px solid #c59b27 !important; font-size: 12px; }
-            .amount-words-block { font-size: 11px; margin-bottom: 20px; }
-            .receipt-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px; }
-            .note-box { border: 1.5px solid #c59b27 !important; padding: 8px 12px; width: 55%; font-size: 10px; color: #222222 !important; }
-            .note-title { font-weight: 800; margin-bottom: 4px; }
+            .total-row td { border-top: 2px solid #c59b27 !important; font-size: 11px; }
+            .amount-words-block { font-size: 10px; margin-bottom: 12px; }
+            .receipt-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; }
+            .note-box { border: 1.5px solid #c59b27 !important; padding: 6px 10px; width: 55%; font-size: 9px; color: #222222 !important; }
+            .note-title { font-weight: 800; margin-bottom: 2px; }
             .note-box ul { list-style: none; padding: 0; margin: 0; }
-            .thank-you { margin-top: 8px; font-weight: 700; }
-            .signatures-box { display: flex; gap: 30px; }
-            .sig-line { display: flex; flex-direction: column; align-items: center; width: 130px; }
-            .sig-line .line { width: 100%; border-bottom: 1px solid #444444; margin-bottom: 4px; }
-            .sig-label { font-size: 10px; color: #333333 !important; }
-            input, select { border: none !important; outline: none !important; background: transparent !important; font-family: Arial, Helvetica, sans-serif !important; font-weight: 700 !important; font-size: 11px !important; color: #000000 !important; }
+            .thank-you { margin-top: 4px; font-weight: 700; }
+            .signatures-box { display: flex; gap: 20px; }
+            .sig-line { display: flex; flex-direction: column; align-items: center; width: 110px; }
+            .sig-line .line { width: 100%; border-bottom: 1px solid #444444; margin-bottom: 3px; }
+            .sig-label { font-size: 9px; color: #333333 !important; }
+            input, select { border: none !important; outline: none !important; background: transparent !important; font-family: Arial, Helvetica, sans-serif !important; font-weight: 700 !important; font-size: 10px !important; color: #000000 !important; }
             input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
           </style>
         </head>
@@ -350,18 +340,18 @@ const downloadPdf = async () => {
   
   const element = receiptContainer.value;
   const opt = {
-    margin: 0,
+    margin: [2, 2, 2, 2],
     filename: `Receipt_${props.data.flatNumber || 'A-101'}.pdf`,
     image: { type: 'jpeg', quality: 1.0 },
     html2canvas: { 
-      scale: 3, 
+      scale: 2.5, 
       useCORS: true,
       letterRendering: true,
       scrollX: 0,
       scrollY: 0,
       logging: false
     },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    jsPDF: { unit: 'mm', format: 'a5', orientation: 'landscape' }
   };
   
   try {
@@ -389,8 +379,8 @@ const downloadPdf = async () => {
   background-color: #1e293b;
   border-radius: var(--radius-md);
   width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
+  max-width: 820px;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-lg);
@@ -407,7 +397,7 @@ const downloadPdf = async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.75rem;
+  padding: 1rem 1.5rem;
   background-color: #0f172a;
   border-bottom: 1px solid #334155;
   color: #fff;
@@ -418,9 +408,9 @@ const downloadPdf = async () => {
   background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 0.55rem 1.25rem;
+  padding: 0.5rem 1.1rem;
   border-radius: var(--radius-sm);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -436,9 +426,9 @@ const downloadPdf = async () => {
   background-color: #6366f1;
   color: #ffffff !important;
   border: 1px solid #4f46e5;
-  padding: 0.55rem 1.25rem;
+  padding: 0.5rem 1.1rem;
   border-radius: var(--radius-sm);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -471,21 +461,21 @@ const downloadPdf = async () => {
 }
 
 .receipt-paper-wrapper {
-  padding: 1.5rem;
+  padding: 1.25rem;
   overflow-y: auto;
   background-color: #334155;
   display: flex;
   justify-content: center;
 }
 
-/* Exact Printable Receipt Layout matching image styling */
+/* Exact Printable Receipt Layout matching image styling - A5 Landscape Ratio */
 .receipt-paper {
-  width: 790px;
+  width: 750px;
   margin: 0 auto;
   background-color: #ffffff;
   color: #000000;
   font-family: Arial, Helvetica, sans-serif;
-  padding: 30px 35px;
+  padding: 16px 22px;
   border: 2px solid #c59b27; /* Gold border line */
   box-sizing: border-box;
 }
@@ -494,7 +484,7 @@ const downloadPdf = async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
 }
 
 .logo-box {
@@ -504,8 +494,8 @@ const downloadPdf = async () => {
   border: 1px solid #d4af37;
   padding: 2px;
   background-color: #ffffff;
-  width: 90px;
-  height: 90px;
+  width: 62px;
+  height: 62px;
 }
 
 .exact-logo-img {
@@ -519,27 +509,27 @@ const downloadPdf = async () => {
 }
 
 .society-name {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 800;
   margin: 0;
   color: #111;
 }
 
 .society-tagline {
-  font-size: 11px;
+  font-size: 10px;
   font-style: italic;
-  margin: 2px 0;
+  margin: 1px 0;
   color: #444;
 }
 
 .society-address {
-  font-size: 10px;
+  font-size: 9px;
   margin: 0;
   color: #555;
 }
 
 .date-block {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -550,29 +540,29 @@ const downloadPdf = async () => {
   color: #ffffff;
   text-align: center;
   font-weight: 800;
-  font-size: 14px;
-  padding: 6px;
+  font-size: 12px;
+  padding: 4px;
   letter-spacing: 1px;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
 }
 
 .details-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  row-gap: 8px;
-  column-gap: 20px;
-  font-size: 11px;
-  margin-bottom: 15px;
+  row-gap: 4px;
+  column-gap: 15px;
+  font-size: 10px;
+  margin-bottom: 8px;
 }
 
 .detail-item {
   display: flex;
   align-items: center;
-  min-height: 22px;
+  min-height: 18px;
 }
 
 .detail-item .label {
-  width: 145px;
+  width: 130px;
   color: #000000;
   font-weight: 800;
   flex-shrink: 0;
@@ -589,20 +579,20 @@ const downloadPdf = async () => {
 .receipt-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
-  margin-bottom: 12px;
+  font-size: 10px;
+  margin-bottom: 6px;
 }
 
 .receipt-table th {
   background-color: #c59b27;
   color: #ffffff;
-  padding: 6px 10px;
+  padding: 4px 8px;
   font-weight: 800;
   border: 1px solid #b38a1f;
 }
 
 .receipt-table td {
-  padding: 6px 10px;
+  padding: 4px 8px;
   border: 1px solid #e2e8f0;
   color: #000;
 }
@@ -613,32 +603,32 @@ const downloadPdf = async () => {
 
 .total-row td {
   border-top: 2px solid #c59b27;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .amount-words-block {
-  font-size: 11px;
-  margin-bottom: 20px;
+  font-size: 10px;
+  margin-bottom: 10px;
 }
 
 .receipt-footer {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-top: 15px;
+  margin-top: 6px;
 }
 
 .note-box {
   border: 1.5px solid #c59b27;
-  padding: 8px 12px;
+  padding: 5px 8px;
   width: 55%;
-  font-size: 10px;
+  font-size: 8.5px;
   color: #222;
 }
 
 .note-title {
   font-weight: 800;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .note-box ul {
@@ -648,30 +638,30 @@ const downloadPdf = async () => {
 }
 
 .thank-you {
-  margin-top: 8px;
+  margin-top: 3px;
   font-weight: 700;
 }
 
 .signatures-box {
   display: flex;
-  gap: 30px;
+  gap: 20px;
 }
 
 .sig-line {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 130px;
+  width: 110px;
 }
 
 .sig-line .line {
   width: 100%;
   border-bottom: 1px solid #444;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .sig-label {
-  font-size: 10px;
+  font-size: 9px;
   color: #333;
 }
 
@@ -682,11 +672,11 @@ const downloadPdf = async () => {
   border-radius: 3px;
   color: #000000;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  height: 20px;
-  line-height: 20px;
-  padding: 0 4px;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 3px;
   box-sizing: border-box;
   vertical-align: middle;
   transition: border-color 0.2s ease;
@@ -704,27 +694,27 @@ const downloadPdf = async () => {
 }
 
 .edit-input {
-  width: calc(100% - 145px);
+  width: calc(100% - 130px);
 }
 
 .edit-input-inline {
-  width: 90px;
+  width: 80px;
 }
 
 .edit-input-num {
-  width: 80px;
+  width: 70px;
   text-align: right;
 }
 
 .edit-input-days {
-  width: 45px;
+  width: 40px;
   text-align: center;
 }
 
 .pdf-export-val {
   color: #000000;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1.2;
   display: inline-block;
   vertical-align: middle;
@@ -740,15 +730,15 @@ const downloadPdf = async () => {
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 !important;
-  height: 20px !important;
-  line-height: 20px !important;
+  height: 18px !important;
+  line-height: 18px !important;
   font-weight: 700 !important;
 }
 
 @media print {
   @page {
-    size: A4 portrait;
-    margin: 5mm;
+    size: A5 landscape;
+    margin: 3mm;
   }
   
   /* Hide everything outside modal */
@@ -785,10 +775,11 @@ const downloadPdf = async () => {
 
   .receipt-paper {
     width: 100% !important;
-    max-width: 790px !important;
+    max-width: 750px !important;
     margin: 0 auto !important;
     box-shadow: none !important;
     border: 2px solid #c59b27 !important;
+    padding: 12px 18px !important;
   }
 }
 </style>

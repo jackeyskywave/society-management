@@ -395,16 +395,9 @@ const parseLinesToStructuredData = (lines) => {
       if (currentRecord && currentRecord.flatNumber) {
         rows.push(currentRecord);
       }
-      const nextLine = lines[i + 1];
-      const isNextMobile = nextLine && mobileRegex.test(nextLine);
-      const isNextFlat = nextLine && flatRegex.test(nextLine);
-      const isNextStatus = nextLine && (nextLine.toUpperCase() === 'OWNER' || nextLine.toUpperCase() === 'RENTED' || nextLine.toUpperCase() === 'TENANT');
-      const isNextDate = nextLine && dateRegex.test(nextLine);
-      const nameVal = (nextLine && !isNextMobile && !isNextFlat && !isNextStatus && !isNextDate) ? nextLine : '';
-
       currentRecord = {
         flatNumber: text.toUpperCase(),
-        name: nameVal,
+        name: '',
         mobile: '',
         ownerOrResident: 'OWNER',
         date: '15/04/2026',
@@ -414,7 +407,9 @@ const parseLinesToStructuredData = (lines) => {
         lateDays: '0'
       };
     } else if (currentRecord) {
-      if (mobileRegex.test(text) || (!currentRecord.mobile && (text.startsWith('q1') || text.includes('Upto') || text.includes('baki')))) {
+      if (!currentRecord.name && !mobileRegex.test(text) && text.toUpperCase() !== 'OWNER' && text.toUpperCase() !== 'RENTED' && text.toUpperCase() !== 'TENANT' && !dateRegex.test(text) && !/^\d{4,6}$/.test(text) && !text.toLowerCase().includes('cash') && !text.toLowerCase().includes('adc') && !text.toLowerCase().includes('kotak') && !text.toLowerCase().includes('paid')) {
+        currentRecord.name = text;
+      } else if (mobileRegex.test(text) || (!currentRecord.mobile && (text.startsWith('q1') || text.includes('Upto') || text.includes('baki')))) {
         currentRecord.mobile = text;
       } else if (text.toUpperCase() === 'OWNER' || text.toUpperCase() === 'RENTED' || text.toUpperCase() === 'TENANT') {
         currentRecord.ownerOrResident = text.toUpperCase();

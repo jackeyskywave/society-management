@@ -362,39 +362,8 @@ const parsePdfContent = async (arrayBuffer) => {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const textContent = await page.getTextContent();
-    
-    // Group text items by y-coordinate (transform[5]) so table rows are parsed line by line across columns
-    const items = textContent.items.map(item => ({
-      str: item.str.trim(),
-      y: Math.round(item.transform[5]),
-      x: Math.round(item.transform[4])
-    })).filter(item => item.str.length > 0);
-
-    // Group items by row (Y coordinate tolerance +- 14px to capture multi-line cell text in same row)
-    const rowGroups = [];
-    items.forEach(item => {
-      let existingGroup = rowGroups.find(g => Math.abs(g.y - item.y) <= 14);
-      if (!existingGroup) {
-        existingGroup = { y: item.y, items: [] };
-        rowGroups.push(existingGroup);
-      }
-      existingGroup.items.push(item);
-    });
-
-    // Sort row groups top to bottom (descending Y)
-    rowGroups.sort((a, b) => b.y - a.y);
-
-    // Merge vertically stacked items within the same column position (X range)
-    const mergedLines = [];
-    rowGroups.forEach(group => {
-      group.items.sort((a, b) => a.x - b.x);
-      group.items.forEach(it => {
-        mergedLines.push(it);
-      });
-    });
-
-    // Build line strings by grouping items that belong to the same flat row
-    fullTextLines.push(...mergedLines.map(it => it.str));
+    const pageLines = textContent.items.map(item => item.str.trim()).filter(Boolean);
+    fullTextLines.push(...pageLines);
   }
 
   const parsed = parseLinesToStructuredData(fullTextLines);

@@ -41,7 +41,7 @@
             <div class="society-title-block">
               <h1 class="society-name">ARISTO BLISS CO. OP. HOU. SOCIETY</h1>
               <p class="society-tagline">We Care, We Share, We Build Better Living</p>
-              <p class="society-address">Aristo Bliss Society, Near saral residency, GOTA 382481.</p>
+              <p class="society-address">Aristo Bliss Society, Near Saral Residency, GOTA 382481.</p>
             </div>
 
             <div class="date-block">

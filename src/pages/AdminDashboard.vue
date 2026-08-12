@@ -392,7 +392,7 @@ const parseLinesToStructuredData = (lines) => {
         lateDays: '0'
       };
     } else if (currentRecord) {
-      if (mobileRegex.test(text)) {
+      if (mobileRegex.test(text) || (!currentRecord.mobile && (text.startsWith('q1') || text.includes('Upto') || text.includes('baki')))) {
         currentRecord.mobile = text;
       } else if (text.toUpperCase() === 'OWNER' || text.toUpperCase() === 'RENTED' || text.toUpperCase() === 'TENANT') {
         currentRecord.ownerOrResident = text.toUpperCase();
@@ -402,18 +402,23 @@ const parseLinesToStructuredData = (lines) => {
         currentRecord.amount = text;
       } else if (text.startsWith('CASH-') || text.startsWith('Cash-') || text.toLowerCase() === 'cash' || text.toLowerCase().startsWith('cash-') || text.toLowerCase() === 'cash-1' || text.toLowerCase() === 'cash-2') {
         currentRecord.cashReceiver = text;
-      } else if (text.includes('+') || text.toLowerCase().includes('kotak') || text.toLowerCase().includes('paid') || text.toLowerCase().includes('screen shot') || text.toLowerCase().includes('main group') || text.toLowerCase().includes('new') || text.toLowerCase().includes('done') || text.toLowerCase().includes('adc') || text.toLowerCase().includes('icici') || text.toLowerCase().includes('hdfc') || text.toLowerCase().includes('chq') || text.toLowerCase().includes('yearly') || text.toLowerCase().includes('shared') || text.toLowerCase().includes('q1')) {
-        // Exclude member name if text contains member's name
-        const cleanText = currentRecord.name ? text.replace(new RegExp(currentRecord.name, 'gi'), '').trim() : text;
-        if (cleanText) {
-          if (!currentRecord.bankDetail) {
-            currentRecord.bankDetail = cleanText;
-          } else if (!currentRecord.bankDetail.includes(cleanText)) {
-            currentRecord.bankDetail += ' ' + cleanText;
+      } else if (text.includes('+') || text.toLowerCase().includes('kotak') || text.toLowerCase().includes('paid') || text.toLowerCase().includes('screen shot') || text.toLowerCase().includes('main group') || text.toLowerCase().includes('new') || text.toLowerCase().includes('done') || text.toLowerCase().includes('icici') || text.toLowerCase().includes('hdfc') || text.toLowerCase().includes('chq') || text.toLowerCase().includes('yearly') || text.toLowerCase().includes('shared') || text.toLowerCase() === 'adc' || text.toLowerCase().includes('adc - old')) {
+        if (currentRecord.mobile && currentRecord.mobile.includes(text)) {
+          // Do not push text to bankDetail if it's already stored in mobile
+        } else {
+          const cleanText = currentRecord.name ? text.replace(new RegExp(currentRecord.name, 'gi'), '').trim() : text;
+          if (cleanText) {
+            if (!currentRecord.bankDetail) {
+              currentRecord.bankDetail = cleanText;
+            } else if (!currentRecord.bankDetail.includes(cleanText)) {
+              currentRecord.bankDetail += ' ' + cleanText;
+            }
           }
         }
       } else if (/^\d{1,3}$/.test(text) && text !== currentRecord.amount) {
         currentRecord.lateDays = text;
+      } else if (!currentRecord.mobile && text.length > 0 && !currentRecord.bankDetail) {
+        currentRecord.mobile = text;
       }
     }
   }

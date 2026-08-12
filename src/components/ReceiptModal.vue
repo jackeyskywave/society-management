@@ -145,7 +145,13 @@
           <div class="amount-words-block">
             <strong>Amount in Words :</strong> <span class="words">{{ amountInWords }}</span>
           </div>
-
+            <div border="1" style="border: 1px solid #c59b27; padding: 6px 10px; width: 50%; font-size: 10px; color: #222222;">
+              <ul class="amount-words-block">
+                   <li><b>Account Name:</b>Aristo Bliss Co Op Housing Ser. Society Ltd</li>
+                   <li><b>Account Number:</b>107010529250</li>
+                   <li><b>IFSC Code:</b>GSCB0ADC203</li>
+              </ul>
+            </div>
           <!-- Footer Note & Signatures -->
           <div class="receipt-footer">
             <div class="note-box">

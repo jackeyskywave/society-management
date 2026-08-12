@@ -187,7 +187,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import html2pdf from 'html2pdf.js';
 
 const props = defineProps({
@@ -223,6 +223,32 @@ const editableData = ref({
   lateCharges: (Number(props.data.lateDays) || 0) * 10,
   otherCharges: 0
 });
+
+// Automatically persist user changes into localStorage ledger data
+watch(editableData, (newVal) => {
+  try {
+    const STORAGE_KEY = 'society_maintenance_ledger_json';
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const list = JSON.parse(saved);
+      const idx = list.findIndex(r => r.flatNumber === props.data.flatNumber);
+      if (idx !== -1) {
+        list[idx].name = newVal.name;
+        list[idx].date = newVal.date;
+        list[idx].flatNumber = newVal.flatNumber;
+        list[idx].mobile = newVal.mobile;
+        list[idx].ownerOrResident = newVal.ownerOrResident;
+        list[idx].paymentMode = newVal.paymentMode;
+        list[idx].bankDetail = newVal.bankDetail;
+        list[idx].cashReceiver = newVal.cashReceiver;
+        list[idx].amount = String(newVal.baseAmount);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      }
+    }
+  } catch (e) {
+    console.error('Failed to sync edited modal data:', e);
+  }
+}, { deep: true });
 
 onMounted(() => {
   if (props.autoDownload) {

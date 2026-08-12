@@ -362,6 +362,15 @@ const parseLinesToStructuredData = (lines) => {
   for (let i = 0; i < lines.length; i++) {
     const text = lines[i];
 
+    // Stop processing record values if we reach page summary rows
+    if (text.toUpperCase().includes('TOTAL (') || text.toUpperCase().includes('COUNT') || text.toUpperCase() === 'NUMBER' || text.toUpperCase() === 'FLAT NUMBER') {
+      if (currentRecord && currentRecord.flatNumber) {
+        rows.push(currentRecord);
+        currentRecord = null;
+      }
+      continue;
+    }
+
     if (flatRegex.test(text)) {
       if (currentRecord && currentRecord.flatNumber) {
         rows.push(currentRecord);
@@ -389,28 +398,25 @@ const parseLinesToStructuredData = (lines) => {
         currentRecord.ownerOrResident = text.toUpperCase();
       } else if (dateRegex.test(text)) {
         currentRecord.date = text;
-      } else if (/^\d{4,6}$/.test(text) && Number(text) > 1000) {
+      } else if (/^\d{4,6}$/.test(text) && Number(text) > 1000 && Number(text) <= 50000) {
         currentRecord.amount = text;
-      } else if (text.startsWith('CASH') || text.startsWith('Cash') || text.toLowerCase().includes('cash deposit')) {
+      } else if (text.startsWith('CASH-') || text.startsWith('Cash-') || text.toLowerCase() === 'cash' || text.toLowerCase().startsWith('cash-') || text.toLowerCase() === 'cash-1' || text.toLowerCase() === 'cash-2') {
         currentRecord.cashReceiver = text;
-      } else if (text.includes('ADC') || text.includes('ICICI') || text.includes('HDFC') || text.includes('CHQ') || text.includes('yearly') || text.toLowerCase().includes('screen shot') || text.toLowerCase().includes('shared')) {
-        if (!currentRecord.bankDetail) {
-          currentRecord.bankDetail = text;
-        } else if (!currentRecord.bankDetail.includes(text)) {
-          currentRecord.bankDetail += ' ' + text;
+      } else if (text.includes('+') || text.toLowerCase().includes('kotak') || text.toLowerCase().includes('paid') || text.toLowerCase().includes('screen shot') || text.toLowerCase().includes('main group') || text.toLowerCase().includes('new') || text.toLowerCase().includes('done') || text.toLowerCase().includes('adc') || text.toLowerCase().includes('icici') || text.toLowerCase().includes('hdfc') || text.toLowerCase().includes('chq') || text.toLowerCase().includes('yearly') || text.toLowerCase().includes('shared') || text.toLowerCase().includes('q1')) {
+        // Exclude member name if text contains member's name
+        const cleanText = currentRecord.name ? text.replace(new RegExp(currentRecord.name, 'gi'), '').trim() : text;
+        if (cleanText) {
+          if (!currentRecord.bankDetail) {
+            currentRecord.bankDetail = cleanText;
+          } else if (!currentRecord.bankDetail.includes(cleanText)) {
+            currentRecord.bankDetail += ' ' + cleanText;
+          }
         }
-      } else if (/^\d{1,3}$/.test(text) && Number(text) <= 365) {
+      } else if (/^\d{1,3}$/.test(text) && text !== currentRecord.amount) {
         currentRecord.lateDays = text;
       }
     }
   }
-
-  // Post-process default fallback for records without cashReceiver or bankDetail
-  rows.forEach(r => {
-    if (!r.cashReceiver && !r.bankDetail) {
-      r.bankDetail = 'ADC';
-    }
-  });
 
   if (currentRecord && currentRecord.flatNumber) {
     rows.push(currentRecord);
@@ -419,16 +425,9 @@ const parseLinesToStructuredData = (lines) => {
   return rows;
 };
 
-// Default exact structured records matching image layout for demonstration
+// Empty fallback array so no sample static data remains in codebase
 const generateSampleParsedRows = () => {
-  return [
-    { flatNumber: 'A-101', name: 'Umangbhai Suthar', mobile: '98987 04977', ownerOrResident: 'OWNER', date: '15/04/2026', amount: '5700', cashReceiver: '', bankDetail: 'ADC', lateDays: '0' },
-    { flatNumber: 'A-102', name: 'Bhavik Patel', mobile: '90993 71966', ownerOrResident: 'OWNER', date: '14/04/2026', amount: '5700', cashReceiver: '', bankDetail: 'ADC', lateDays: '0' },
-    { flatNumber: 'A-103', name: 'Akashbhai Patel', mobile: '99988 47325', ownerOrResident: 'OWNER', date: '13/04/2026', amount: '5700', cashReceiver: 'CASH-1', bankDetail: '', lateDays: '0' },
-    { flatNumber: 'A-104', name: 'Jayeshbhai Patel', mobile: '93763 91558', ownerOrResident: 'OWNER', date: '14/04/2026', amount: '5700', cashReceiver: '', bankDetail: 'ADC', lateDays: '0' },
-    { flatNumber: 'A-201', name: 'Rajeshbhai Vekariya', mobile: '70168 67079', ownerOrResident: 'OWNER', date: '15/04/2026', amount: '5700', cashReceiver: '', bankDetail: 'ADC', lateDays: '0' },
-    { flatNumber: 'A-202', name: 'Pratikbhai Shah', mobile: '99259 41767', ownerOrResident: 'OWNER', date: '15/04/2026', amount: '5700', cashReceiver: '', bankDetail: 'ADC', lateDays: '0' }
-  ];
+  return [];
 };
 
 </script>

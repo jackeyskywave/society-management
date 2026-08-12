@@ -340,7 +340,7 @@ const downloadPdf = async () => {
   
   const element = receiptContainer.value;
   const opt = {
-    margin: [2, 2, 2, 2],
+    margin: [3, 2, 2, 2], // 3mm top margin (0.3 cm)
     filename: `Receipt_${props.data.flatNumber || 'A-101'}.pdf`,
     image: { type: 'jpeg', quality: 1.0 },
     html2canvas: { 
@@ -461,7 +461,7 @@ const downloadPdf = async () => {
 }
 
 .receipt-paper-wrapper {
-  padding: 1.25rem;
+  padding: 1.5rem;
   overflow-y: auto;
   background-color: #334155;
   display: flex;
@@ -470,8 +470,8 @@ const downloadPdf = async () => {
 
 /* Exact Printable Receipt Layout matching image styling - A5 Landscape Ratio */
 .receipt-paper {
-  width: 750px;
-  margin: 0 auto;
+  width: 740px;
+  margin: 8px auto;
   background-color: #ffffff;
   color: #000000;
   font-family: Arial, Helvetica, sans-serif;

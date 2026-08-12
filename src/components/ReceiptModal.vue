@@ -282,10 +282,10 @@ const printReceipt = async () => {
         <head>
           <title>Receipt_${editableData.value.flatNumber}</title>
           <style>
-            @page { size: A5 landscape; margin: 3mm; }
+            @page { size: A5 landscape; margin: 0; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
-            body { margin: 0; padding: 6mm; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; }
-            .receipt-paper { width: 100%; max-width: 790px; margin: 0 auto; background-color: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif; padding: 14px 18px; border: 2px solid #c59b27 !important; box-sizing: border-box; }
+            html, body { height: 100%; margin: 0; padding: 0; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; display: flex; align-items: center; justify-content: center; }
+            .receipt-paper { width: 198mm; height: 136mm; margin: auto; background-color: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif; padding: 12px 18px; border: 2px solid #c59b27 !important; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
             .receipt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
             .logo-box { display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37 !important; padding: 2px; background-color: #ffffff !important; width: 65px; height: 65px; }
             .exact-logo-img { width: 100%; height: 100%; object-fit: contain; }
@@ -340,7 +340,7 @@ const downloadPdf = async () => {
   
   const element = receiptContainer.value;
   const opt = {
-    margin: [6, 6, 6, 6], // 6mm (0.6 cm) margin around all sides so gold border has outer whitespace
+    margin: [5, 5, 5, 5], // Exact 0.5 cm (5mm) margin around all 4 sides
     filename: `Receipt_${props.data.flatNumber || 'A-101'}.pdf`,
     image: { type: 'jpeg', quality: 1.0 },
     html2canvas: { 

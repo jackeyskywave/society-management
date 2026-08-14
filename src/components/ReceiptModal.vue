@@ -80,7 +80,7 @@
               <input v-else v-model="editableData.propertyType" class="edit-input bold-val" />
             </div>
 
-            <div class="detail-item">
+            <div class="detail-item" v-if="!isExportingPdf || (editableData.mobile && editableData.mobile.trim())">
               <span class="label">Mobile No. :</span>
               <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.mobile }}</span>
               <input v-else v-model="editableData.mobile" class="edit-input bold-val" />
@@ -117,8 +117,8 @@
                 <td>1</td>
                 <td>Maintenance Charges</td>
                 <td style="text-align: right;">
-                  <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.baseAmount }}</span>
-                  <input v-else v-model.number="editableData.baseAmount" type="number" class="edit-input-num bold-val" />
+                  <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ maintenanceCharges }}</span>
+                  <input v-else :value="maintenanceCharges" readonly class="edit-input-num bold-val" />
                 </td>
               </tr>
               <tr>
@@ -141,7 +141,10 @@
             <tfoot>
               <tr class="total-row">
                 <td colspan="2" style="text-align: right;" class="bold-val">TOTAL AMOUNT</td>
-                <td style="text-align: right;" class="bold-val">₹ {{ totalAmount }}</td>
+                <td style="text-align: right;" class="bold-val">
+                  <span v-if="isExportingPdf" class="pdf-export-val bold-val">₹ {{ totalAmount }}</span>
+                  <input v-else v-model.number="editableData.baseAmount" type="number" class="edit-input-num bold-val" style="width: 100px; text-align: right;" />
+                </td>
               </tr>
             </tfoot>
           </table>
@@ -253,23 +256,47 @@ const computeDynamicPeriod = (dateStr, explicitPeriod) => {
 
 // Reactive state for editable fields inside receipt template
 const editableData = ref({
-  date: props.data.date || new Date().toLocaleDateString('en-GB'),
-  flatNumber: props.data.flatNumber || 'A-101',
-  period: computeDynamicPeriod(props.data.date, props.data.period),
-  name: props.data.name || '',
-  propertyType: 'FLAT',
-  mobile: props.data.mobile || '98987 04977',
-  ownerOrResident: props.data.ownerOrResident || 'OWNER',
-  paymentMode: props.data.paymentMode || (props.data.cashReceiver && props.data.cashReceiver.trim() ? 'CASH' : (props.data.bankDetail ? 'BANK' : 'CASH')),
-  bankDetail: props.data.bankDetail || '',
-  cashReceiver: props.data.cashReceiver || '',
+  date: props.data?.date || new Date().toLocaleDateString('en-GB'),
+  flatNumber: props.data?.flatNumber || '',
+  period: computeDynamicPeriod(props.data?.date, props.data?.period),
+  name: props.data?.name || '',
+  propertyType: (props.data?.flatNumber === 'BLANK-1' || !props.data?.flatNumber) ? '' : (props.data?.propertyType || 'FLAT'),
+  mobile: props.data?.mobile || '',
+  ownerOrResident: (props.data?.flatNumber === 'BLANK-1' || !props.data?.flatNumber) ? '' : (props.data?.ownerOrResident || ''),
+  paymentMode: (props.data?.cashReceiver && props.data.cashReceiver.trim() ? 'CASH' : (props.data?.bankDetail ? 'BANK' : '')),
+  bankDetail: props.data?.bankDetail || '',
+  cashReceiver: props.data?.cashReceiver || '',
   chequeNo: '',
-  baseAmount: Number(props.data.amount) || 5700,
-  lateDays: Number(props.data.lateDays) || 0,
-  lateCharges: (Number(props.data.lateDays) || 0) * 10,
+  baseAmount: isNaN(Number(props.data?.amount)) ? 0 : Number(props.data?.amount),
+  lateDays: Number(props.data?.lateDays) || 0,
+  lateCharges: (Number(props.data?.lateDays) || 0) * 10,
   otherCharges: 0,
   remarks: 'Thank you for your payment.'
 });
+
+watch(() => props.data, (newData) => {
+  if (newData) {
+    const isBlank = newData.flatNumber === 'BLANK-1' || !newData.flatNumber;
+    editableData.value = {
+      date: newData.date || new Date().toLocaleDateString('en-GB'),
+      flatNumber: newData.flatNumber || '',
+      period: computeDynamicPeriod(newData.date, newData.period),
+      name: newData.name || '',
+      propertyType: isBlank ? '' : (newData.propertyType || 'FLAT'),
+      mobile: newData.mobile || '',
+      ownerOrResident: isBlank ? '' : (newData.ownerOrResident || ''),
+      paymentMode: (newData.cashReceiver && newData.cashReceiver.trim() ? 'CASH' : (newData.bankDetail ? 'BANK' : '')),
+      bankDetail: newData.bankDetail || '',
+      cashReceiver: newData.cashReceiver || '',
+      chequeNo: '',
+      baseAmount: isNaN(Number(newData.amount)) ? 0 : Number(newData.amount),
+      lateDays: Number(newData.lateDays) || 0,
+      lateCharges: (Number(newData.lateDays) || 0) * 10,
+      otherCharges: 0,
+      remarks: 'Thank you for your payment.'
+    };
+  }
+}, { immediate: true });
 
 const bankInfo = computed(() => {
   const bd = props.data.bankDetail || '';
@@ -328,15 +355,19 @@ onMounted(() => {
 });
 
 // Dynamic calculations based on editable state
-const baseAmount = computed(() => {
+const totalAmount = computed(() => {
   const amt = Number(editableData.value.baseAmount);
   return isNaN(amt) ? 0 : amt;
 });
 
-const totalAmount = computed(() => {
-  const late = Number(editableData.value.lateCharges) || 0;
+const lateCharges = computed(() => {
+  const late = Number(editableData.value.lateCharges);
+  return isNaN(late) ? 0 : late;
+});
+
+const maintenanceCharges = computed(() => {
   const other = Number(editableData.value.otherCharges) || 0;
-  return baseAmount.value + late + other;
+  return Math.max(0, totalAmount.value - lateCharges.value - other);
 });
 
 // Helper function to convert numeric amount to words

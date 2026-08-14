@@ -465,9 +465,9 @@ const generateReceiptHtmlStr = (row) => {
   const mobile = row.mobile || '';
   const ownerOrResident = row.ownerOrResident || 'OWNER';
   const paymentMode = row.paymentMode || (row.cashReceiver && row.cashReceiver.trim() ? 'CASH' : (row.bankDetail ? 'BANK' : 'CASH'));
-  const baseAmount = Number(row.amount) || 5700;
+  const totalAmount = Number(row.amount) || 0;
   const lateCharges = (Number(row.lateDays) || 0) * 10;
-  const totalAmount = baseAmount + lateCharges;
+  const maintenanceCharges = Math.max(0, totalAmount - lateCharges);
   const amountWords = `Rupees ${numberToWords(totalAmount)} Only`;
 
   const bankDetail = row.bankDetail || '';
@@ -500,7 +500,7 @@ const generateReceiptHtmlStr = (row) => {
         <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Maintenance Period :</span><span style="font-weight: 800;">${period}</span></div>
         ${name && name.trim() ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Member Name :</span><span style="font-weight: 800;">${name}</span></div>` : ''}
         <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Property Type :</span><span style="font-weight: 800;">${propertyType}</span></div>
-        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Mobile No. :</span><span style="font-weight: 800;">${mobile}</span></div>
+        ${mobile && mobile.trim() ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Mobile No. :</span><span style="font-weight: 800;">${mobile}</span></div>` : ''}
         <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Owner / Tenant :</span><span style="font-weight: 800;">${ownerOrResident}</span></div>
         <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Payment Mode :</span><span style="font-weight: 800;">${paymentMode}</span></div>
         ${extraDetailVal ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">${extraDetailLabel}</span><span style="font-weight: 800;">${extraDetailVal}</span></div>` : ''}
@@ -515,7 +515,7 @@ const generateReceiptHtmlStr = (row) => {
           </tr>
         </thead>
         <tbody>
-          <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">1</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Maintenance Charges</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${baseAmount}</td></tr>
+          <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">1</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Maintenance Charges</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${maintenanceCharges}</td></tr>
           <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">2</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Late Payment Charges</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${lateCharges}</td></tr>
           <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">3</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Other Charges (If Any)</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">0</td></tr>
         </tbody>
@@ -744,10 +744,8 @@ const loadFromStorage = () => {
     console.error('Failed to load ledger data from storage:', err);
   }
 
-  // Fallback: populate static template row by default if empty
   const defaultRows = generateSampleParsedRows();
   ledgerData.value = defaultRows;
-  saveToStorage(defaultRows);
 };
 
 onMounted(() => {
@@ -802,20 +800,18 @@ const handleFileUpload = async (event) => {
     const arrayBuffer = await file.arrayBuffer();
     let parsedRows = await parsePdfContent(arrayBuffer);
     
-    // Always include a blank template row as the very first record
+    // Always include BLANK-1 as the default first record
     const blankRow = {
       flatNumber: 'BLANK-1',
       name: '',
       mobile: '',
-      ownerOrResident: 'OWNER',
+      ownerOrResident: '',
       date: new Date().toLocaleDateString('en-GB'),
-      amount: '5700',
+      amount: '0',
       cashReceiver: '',
       bankDetail: '',
       lateDays: '0'
     };
-
-    // Prepend blank row if not already present
     parsedRows = [blankRow, ...parsedRows.filter(r => r.flatNumber !== 'BLANK-1')];
 
     // Store newly uploaded JSON
@@ -849,7 +845,7 @@ const DEFAULT_COLUMN_BOUNDS = [
   { key: 'lateDays',        min: 450, max: 9999 },
 ];
 
-const FLAT_REGEX = /^(?:[A-Z]\s*-\s*\d{2,4}|Shop\s*-?\s*\d{1,2}|[A-Z]\d{2,4})$/i;
+const FLAT_REGEX = /^(?:[A-Z]\s*-?\s*\d{1,4}|Shop\s*-?\s*\d{1,2}|[A-Z]\d{1,4})$/i;
 const ROW_TOLERANCE = 6; // y-distance in points that still counts as same row
 
 const parsePdfContent = async (arrayBuffer) => {
@@ -993,12 +989,12 @@ const parsePdfContent = async (arrayBuffer) => {
 const generateSampleParsedRows = () => {
   return [
     {
-      flatNumber: 'A-101',
+      flatNumber: 'BLANK-1',
       name: '',
       mobile: '',
-      ownerOrResident: 'OWNER',
+      ownerOrResident: '',
       date: new Date().toLocaleDateString('en-GB'),
-      amount: '5700',
+      amount: '0',
       cashReceiver: '',
       bankDetail: '',
       lateDays: '0'

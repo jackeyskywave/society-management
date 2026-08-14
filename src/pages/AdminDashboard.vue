@@ -278,6 +278,7 @@ import { ref, computed, onMounted } from 'vue';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import ReceiptModal from '../components/ReceiptModal.vue';
 import * as pdfjsLib from 'pdfjs-dist';
+import { LOGO_BASE64 } from '../assets/logoBase64.js';
 
 const selectedReceiptData = ref(null);
 const shouldAutoDownload = ref(false);
@@ -436,6 +437,24 @@ const computeDynamicPeriod = (dateStr, explicitPeriod) => {
   return `JANUARY ${year} TO MARCH ${year} (Q4)`;
 };
 
+// Helper function to convert numeric amount to words
+const numberToWords = (num) => {
+  if (!num || isNaN(num)) return 'Zero';
+  const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+  const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  
+  if ((num = num.toString()).length > 9) return 'Overflow';
+  const n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+  if (!n) return '';
+  let str = '';
+  str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+  str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+  str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+  str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+  str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+  return str.trim();
+};
+
 // Helper function to build html receipt string for a row
 const generateReceiptHtmlStr = (row) => {
   const date = row.date || new Date().toLocaleDateString('en-GB');
@@ -449,74 +468,87 @@ const generateReceiptHtmlStr = (row) => {
   const baseAmount = Number(row.amount) || 5700;
   const lateCharges = (Number(row.lateDays) || 0) * 10;
   const totalAmount = baseAmount + lateCharges;
+  const amountWords = `Rupees ${numberToWords(totalAmount)} Only`;
+
+  const bankDetail = row.bankDetail || '';
+  const cashReceiver = row.cashReceiver || '';
+  const extraDetailLabel = paymentMode === 'BANK' ? 'Bank Detail :' : 'Cash Receiver :';
+  const extraDetailVal = paymentMode === 'BANK' ? bankDetail : cashReceiver;
 
   return `
-    <div class="receipt-paper" style="page-break-after: always; break-after: page; width: 198mm; height: 136mm; margin: 0 auto 20px auto; background-color: #ffffff; color: #000000; font-family: Arial, sans-serif; padding: 12px 18px; border: 2px solid #c59b27; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
-      <div class="receipt-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-        <div class="logo-box" style="display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37; padding: 2px; background-color: #ffffff; width: 60px; height: 60px;">
-          <img src="/main_logo.png" alt="ARISTO BLISS" style="width: 100%; height: 100%; object-fit: contain;" />
+    <div class="receipt-paper" style="page-break-after: always; break-after: page; width: 198mm; height: 136mm; margin: 0 auto 20px auto; background-color: #ffffff; color: #000000; font-family: Arial, Helvetica, sans-serif; padding: 12px 18px; border: 2px solid #c59b27; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
+      <div class="receipt-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <div class="logo-box" style="display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37; padding: 2px; background-color: #ffffff; width: 65px; height: 65px;">
+          <img src="${LOGO_BASE64}" alt="ARISTO BLISS" style="width: 100%; height: 100%; object-fit: contain;" />
         </div>
         <div class="society-title-block" style="text-align: center;">
-          <h1 style="font-size: 15px; font-weight: 800; margin: 0; color: #111111;">ARISTO BLISS CO OP HOUSING SER. SOCIETY LTD</h1>
-          <p style="font-size: 9px; font-style: italic; margin: 1px 0; color: #444444;">We Care, We Share, We Build Better Living</p>
-          <p style="font-size: 8px; margin: 0; color: #555555;">Aristo Bliss Society, Near Saral Residency, GOTA 382481.</p>
+          <h1 style="font-size: 16px; font-weight: 800; margin: 0; color: #111111;">ARISTO BLISS CO OP HOUSING SER. SOCIETY LTD</h1>
+          <p style="font-size: 10px; font-style: italic; margin: 1px 0; color: #444444;">We Care, We Share, We Build Better Living</p>
+          <p style="font-size: 9px; margin: 0; color: #555555;">Aristo Bliss Society, Near Saral Residency, GOTA 382481.</p>
         </div>
         <div class="date-block" style="font-size: 11px; font-weight: 700;">
           <strong>DATE :&nbsp;</strong> <span>${date}</span>
         </div>
       </div>
 
-      <div class="section-banner" style="background-color: #c59b27; color: #ffffff; text-align: center; font-weight: 800; font-size: 11px; padding: 4px; letter-spacing: 1px; margin-bottom: 8px;">
+      <div class="section-banner" style="background-color: #c59b27; color: #ffffff; text-align: center; font-weight: 800; font-size: 12px; padding: 4px; letter-spacing: 1px; margin-bottom: 10px;">
         MAINTENANCE PAYMENT RECEIPT
       </div>
 
-      <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; row-gap: 4px; column-gap: 15px; font-size: 10px; margin-bottom: 8px;">
-        <div style="display: flex;"><span style="width: 120px; font-weight: 800;">Flat / Shop No. :</span><span style="font-weight: 800;">${flatNumber}</span></div>
-        <div style="display: flex;"><span style="width: 120px; font-weight: 800;">Maintenance Period :</span><span style="font-weight: 800;">${period}</span></div>
-        <div style="display: flex;"><span style="width: 120px; font-weight: 800;">Member Name :</span><span style="font-weight: 800;">${name}</span></div>
-        <div style="display: flex;"><span style="width: 120px; font-weight: 800;">Property Type :</span><span style="font-weight: 800;">${propertyType}</span></div>
-        <div style="display: flex;"><span style="width: 120px; font-weight: 800;">Mobile No. :</span><span style="font-weight: 800;">${mobile}</span></div>
-        <div style="display: flex;"><span style="width: 120px; font-weight: 800;">Owner / Tenant :</span><span style="font-weight: 800;">${ownerOrResident}</span></div>
-        <div style="display: flex;"><span style="width: 120px; font-weight: 800;">Payment Mode :</span><span style="font-weight: 800;">${paymentMode}</span></div>
+      <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; row-gap: 5px; column-gap: 15px; font-size: 10px; margin-bottom: 10px;">
+        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Flat / Shop No. :</span><span style="font-weight: 800;">${flatNumber}</span></div>
+        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Maintenance Period :</span><span style="font-weight: 800;">${period}</span></div>
+        ${name && name.trim() ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Member Name :</span><span style="font-weight: 800;">${name}</span></div>` : ''}
+        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Property Type :</span><span style="font-weight: 800;">${propertyType}</span></div>
+        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Mobile No. :</span><span style="font-weight: 800;">${mobile}</span></div>
+        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Owner / Tenant :</span><span style="font-weight: 800;">${ownerOrResident}</span></div>
+        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Payment Mode :</span><span style="font-weight: 800;">${paymentMode}</span></div>
+        ${extraDetailVal ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">${extraDetailLabel}</span><span style="font-weight: 800;">${extraDetailVal}</span></div>` : ''}
       </div>
 
       <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 8px;">
         <thead>
           <tr>
-            <th style="background-color: #c59b27; color: #ffffff; padding: 4px; font-weight: 800; border: 1px solid #b38a1f; width: 10%;">SR. NO.</th>
-            <th style="background-color: #c59b27; color: #ffffff; padding: 4px; font-weight: 800; border: 1px solid #b38a1f; width: 65%;">PARTICULARS</th>
-            <th style="background-color: #c59b27; color: #ffffff; padding: 4px; font-weight: 800; border: 1px solid #b38a1f; width: 25%; text-align: right;">AMOUNT (₹)</th>
+            <th style="background-color: #c59b27; color: #ffffff; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f; width: 10%;">SR. NO.</th>
+            <th style="background-color: #c59b27; color: #ffffff; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f; width: 65%;">PARTICULARS</th>
+            <th style="background-color: #c59b27; color: #ffffff; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f; width: 25%; text-align: right;">AMOUNT (₹)</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td style="padding: 4px; border: 1px solid #e2e8f0;">1</td><td style="padding: 4px; border: 1px solid #e2e8f0;">Maintenance Charges</td><td style="padding: 4px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${baseAmount}</td></tr>
-          <tr><td style="padding: 4px; border: 1px solid #e2e8f0;">2</td><td style="padding: 4px; border: 1px solid #e2e8f0;">Late Payment Charges</td><td style="padding: 4px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${lateCharges}</td></tr>
-          <tr><td style="padding: 4px; border: 1px solid #e2e8f0;">3</td><td style="padding: 4px; border: 1px solid #e2e8f0;">Other Charges (If Any)</td><td style="padding: 4px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">0</td></tr>
+          <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">1</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Maintenance Charges</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${baseAmount}</td></tr>
+          <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">2</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Late Payment Charges</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${lateCharges}</td></tr>
+          <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">3</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Other Charges (If Any)</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">0</td></tr>
         </tbody>
         <tfoot>
           <tr style="background-color: #f7f3e8;">
-            <td colspan="2" style="text-align: right; font-weight: 800; padding: 4px; border: 1px solid #e2e8f0;">TOTAL AMOUNT</td>
-            <td style="text-align: right; font-weight: 800; padding: 4px; border: 1px solid #e2e8f0;">₹ ${totalAmount}</td>
+            <td colspan="2" style="text-align: right; font-weight: 800; padding: 4px 8px; border: 1px solid #e2e8f0; font-size: 11px;">TOTAL AMOUNT</td>
+            <td style="text-align: right; font-weight: 800; padding: 4px 8px; border: 1px solid #e2e8f0; font-size: 11px;">₹ ${totalAmount}</td>
           </tr>
         </tfoot>
       </table>
 
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6px;">
-        <div style="border: 1.5px solid #c59b27; padding: 4px 8px; width: 55%; font-size: 8px;">
+      <div class="amount-words-block" style="font-size: 10px; margin-bottom: 12px;">
+        <strong>Amount in Words :</strong> <span>${amountWords}</span>
+      </div>
+
+      <div class="receipt-footer" style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
+        <div class="note-box" style="border: 1.5px solid #c59b27; padding: 6px 10px; width: 55%; font-size: 9px; color: #222222;">
           <div style="font-weight: 800; margin-bottom: 2px;">NOTE</div>
           <ul style="list-style: none; padding: 0; margin: 0;">
             <li>• Maintenance is to be paid by the 15th of every month.</li>
-            <li>• Rs.10 per day will be charged as late fee after due date.</li>
+            <li>• Rs.10 per day will be charged as late fee after the due date.</li>
+            <li>• Please collect receipt for every payment.</li>
           </ul>
+          <div style="margin-top: 4px; font-weight: 700;">Thank you for your timely payment.</div>
         </div>
-        <div style="display: flex; gap: 20px;">
-          <div style="display: flex; flex-direction: column; align-items: center; width: 100px;">
-            <span style="width: 100%; border-bottom: 1px solid #444; margin-bottom: 2px;"></span>
-            <span style="font-size: 8px;">Received By</span>
+        <div class="signatures-box" style="display: flex; gap: 20px;">
+          <div style="display: flex; flex-direction: column; align-items: center; width: 110px;">
+            <span style="width: 100%; border-bottom: 1px solid #444; margin-bottom: 3px;"></span>
+            <span style="font-size: 9px;">Received By</span>
           </div>
-          <div style="display: flex; flex-direction: column; align-items: center; width: 100px;">
-            <span style="width: 100%; border-bottom: 1px solid #444; margin-bottom: 2px;"></span>
-            <span style="font-size: 8px;">Authorised Signatory</span>
+          <div style="display: flex; flex-direction: column; align-items: center; width: 110px;">
+            <span style="width: 100%; border-bottom: 1px solid #444; margin-bottom: 3px;"></span>
+            <span style="font-size: 9px;">Authorised Signatory</span>
           </div>
         </div>
       </div>
@@ -546,15 +578,24 @@ const printSelectedReceipts = () => {
         </head>
         <body>
           ${receiptsMarkup}
+          <script>
+            function triggerPrint() {
+              window.print();
+              window.close();
+            }
+            if (document.readyState === 'complete') {
+              setTimeout(triggerPrint, 300);
+            } else {
+              window.onload = function() {
+                setTimeout(triggerPrint, 300);
+              };
+            }
+          <\/script>
         </body>
       </html>
     `);
     printWindow.document.close();
     printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 400);
   }
 };
 

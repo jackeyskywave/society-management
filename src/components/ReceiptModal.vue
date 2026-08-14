@@ -69,7 +69,7 @@
               <input v-else v-model="editableData.period" class="edit-input bold-val" />
             </div>
 
-            <div class="detail-item">
+            <div class="detail-item" v-if="!isExportingPdf || (editableData.name && editableData.name.trim())">
               <span class="label">Member Name :</span>
               <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.name }}</span>
               <input v-else v-model="editableData.name" class="edit-input bold-val" />
@@ -95,6 +95,11 @@
               <span class="label">Payment Mode :</span>
               <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.paymentMode }}</span>
               <input v-else v-model="editableData.paymentMode" class="edit-input bold-val" />
+            </div>
+            <div class="detail-item" v-if="editableData.bankDetail || editableData.cashReceiver">
+              <span class="label">{{ editableData.paymentMode === 'BANK' ? 'Bank Detail :' : 'Cash Receiver :' }}</span>
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.paymentMode === 'BANK' ? editableData.bankDetail : editableData.cashReceiver }}</span>
+              <input v-else v-model="editableData.bankDetail" class="edit-input bold-val" />
             </div>
           </div>
 

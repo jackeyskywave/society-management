@@ -660,7 +660,8 @@ const filteredData = computed(() => {
       if (selectedBlock.value === 'Shop') {
         if (!fn.startsWith('SHOP')) return false;
       } else {
-        if (!fn.startsWith(selectedBlock.value)) return false;
+        const cleanBlock = selectedBlock.value.replace(/BLOCK/i, '').trim();
+        if (!fn.startsWith(cleanBlock)) return false;
       }
     }
 
@@ -846,7 +847,7 @@ const DEFAULT_COLUMN_BOUNDS = [
 ];
 
 const FLAT_REGEX = /^(?:[A-Z]\s*-?\s*\d{1,4}|Shop\s*-?\s*\d{1,2}|[A-Z]\d{1,4})$/i;
-const ROW_TOLERANCE = 6; // y-distance in points that still counts as same row
+const ROW_TOLERANCE = 4; // y-distance in points that still counts as same row
 
 const parsePdfContent = async (arrayBuffer) => {
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -877,8 +878,8 @@ const parsePdfContent = async (arrayBuffer) => {
     let activeColumnBounds = [...DEFAULT_COLUMN_BOUNDS];
 
     // Find header line items using exact title text
-    const flatHeaderItem = items.find(it => /FLAT\s*NUMBER|FLAT/i.test(it.text) && it.x < 120);
-    const nameHeaderItem = items.find(it => /NAME/i.test(it.text) && it.x > 80 && it.x < 220);
+    const flatHeaderItem = items.find(it => /FLAT\s*NUMBER|^NUMBER$|FLAT/i.test(it.text.trim()) && it.x < 120);
+    const nameHeaderItem = items.find(it => /^NAME$/i.test(it.text.trim()) && it.x > 70 && it.x < 220);
     const mobileHeaderItem = items.find(it => /MOBILE/i.test(it.text));
     const statusHeaderItem = items.find(it => /O\s*\/\s*R/i.test(it.text));
     const dateHeaderItem = items.find(it => /DATE/i.test(it.text) && it.x > 250);
@@ -929,31 +930,18 @@ const parsePdfContent = async (arrayBuffer) => {
     const maxFlatX = activeColumnBounds[0].max;
 
     for (const band of bands) {
-      const flatItem = band.items.find(it => it.x < maxFlatX + 20 && FLAT_REGEX.test(it.text.trim()));
-      const bandText = band.items.map(it => it.text).join(' ');
+      const flatItem = band.items.find(it => FLAT_REGEX.test(it.text.trim()));
 
       if (flatItem) {
-        if (current) pageRecords.push(current);
         current = {
           flatY: band.y,
           items: [...band.items]
         };
-      } else if (current) {
-        if (SUMMARY_RE.test(bandText)) {
-          pageRecords.push(current);
-          current = null;
-        } else {
-          // Continuation band: Append multi-line notes associated with current flat record (within 32 points)
-          if (Math.abs(band.y - current.flatY) < 32) {
-            current.items.push(...band.items);
-          } else {
-            pageRecords.push(current);
-            current = null;
-          }
-        }
+        pageRecords.push(current);
+      } else if (current && Math.abs(band.y - current.flatY) < 18) {
+        current.items.push(...band.items);
       }
     }
-    if (current) pageRecords.push(current);
 
     // Map each page record using active column boundaries
     for (const record of pageRecords) {
@@ -974,9 +962,15 @@ const parsePdfContent = async (arrayBuffer) => {
         row[col.key] = parts.join(' ').replace(/\s+/g, ' ').trim();
       }
 
-      row.flatNumber = row.flatNumber.toUpperCase().replace(/\s+/g, ' ');
+      // Filter out table summary noise (e.g. '69 Total' or '52 Total') from flatNumber
+      row.flatNumber = row.flatNumber
+        .replace(/\d+\s*TOTAL\s*/gi, '')
+        .replace(/TOTAL\s*/gi, '')
+        .toUpperCase()
+        .replace(/\s+/g, ' ')
+        .trim();
 
-      if (row.flatNumber && /^(?:[A-Z]\s*-?\s*\d|SHOP)/i.test(row.flatNumber) && !/TOTAL|COUNT/i.test(row.flatNumber)) {
+      if (row.flatNumber && /^(?:[A-Z]\s*-?\s*\d|SHOP)/i.test(row.flatNumber)) {
         allParsedRows.push(row);
       }
     }

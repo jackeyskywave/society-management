@@ -184,7 +184,15 @@ const props = defineProps({
     type: Object,
     default: () => ({})
   },
+  globalPeriod: {
+    type: String,
+    default: 'AUTO'
+  },
   autoDownload: {
+    type: Boolean,
+    default: false
+  },
+  autoPrint: {
     type: Boolean,
     default: false
   }
@@ -194,12 +202,56 @@ defineEmits(['close']);
 
 const receiptContainer = ref(null);
 
+// Helper to calculate dynamic quarter string (e.g. Q1, Q2, Q3, Q4) based on date or global override
+const computeDynamicPeriod = (dateStr, explicitPeriod) => {
+  let year = new Date().getFullYear();
+  let month = -1;
+
+  if (dateStr && typeof dateStr === 'string') {
+    const parts = dateStr.trim().split(/[\/\.-]/);
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        year = Number(parts[0]);
+        month = Number(parts[1]) - 1;
+      } else {
+        month = Number(parts[1]) - 1;
+        year = Number(parts[2]);
+      }
+    }
+  }
+
+  if (props.globalPeriod === 'Q1') return `APRIL ${year} TO JUNE ${year} (Q1)`;
+  if (props.globalPeriod === 'Q2') return `JULY ${year} TO SEPTEMBER ${year} (Q2)`;
+  if (props.globalPeriod === 'Q3') return `OCTOBER ${year} TO DECEMBER ${year} (Q3)`;
+  if (props.globalPeriod === 'Q4') return `JANUARY ${year} TO MARCH ${year} (Q4)`;
+
+  if (!isNaN(month) && month >= 0 && month <= 11) {
+    if (month >= 3 && month <= 5) {
+      return `APRIL ${year} TO JUNE ${year} (Q1)`;
+    } else if (month >= 6 && month <= 8) {
+      return `JULY ${year} TO SEPTEMBER ${year} (Q2)`;
+    } else if (month >= 9 && month <= 11) {
+      return `OCTOBER ${year} TO DECEMBER ${year} (Q3)`;
+    } else {
+      return `JANUARY ${year} TO MARCH ${year} (Q4)`;
+    }
+  }
+
+  if (explicitPeriod && explicitPeriod.trim()) return explicitPeriod;
+
+  const currentMonth = new Date().getMonth();
+  if (currentMonth >= 3 && currentMonth <= 5) return `APRIL ${year} TO JUNE ${year} (Q1)`;
+  if (currentMonth >= 6 && currentMonth <= 8) return `JULY ${year} TO SEPTEMBER ${year} (Q2)`;
+  if (currentMonth >= 9 && currentMonth <= 11) return `OCTOBER ${year} TO DECEMBER ${year} (Q3)`;
+  return `JANUARY ${year} TO MARCH ${year} (Q4)`;
+};
+
 // Reactive state for editable fields inside receipt template
 const editableData = ref({
-  date: props.data.date || '15/04/2026',
+  date: props.data.date || new Date().toLocaleDateString('en-GB'),
   flatNumber: props.data.flatNumber || 'A-101',
-  period: props.data.period || 'APRIL 2026 TO JUNE 2026 (Q1)',
-  name: props.data.name || 'Umangbhai Suthar',
+  period: computeDynamicPeriod(props.data.date, props.data.period),
+  name: props.data.name || '',
   propertyType: 'FLAT',
   mobile: props.data.mobile || '98987 04977',
   ownerOrResident: props.data.ownerOrResident || 'OWNER',
@@ -210,7 +262,15 @@ const editableData = ref({
   baseAmount: Number(props.data.amount) || 5700,
   lateDays: Number(props.data.lateDays) || 0,
   lateCharges: (Number(props.data.lateDays) || 0) * 10,
-  otherCharges: 0
+  otherCharges: 0,
+  remarks: 'Thank you for your payment.'
+});
+
+const bankInfo = computed(() => {
+  const bd = props.data.bankDetail || '';
+  const isAdc = bd.toLowerCase().includes('adc');
+  const extra = bd.replace(/adc-?/i, '').trim();
+  return { isAdc, extra };
 });
 
 // Automatically persist user changes into localStorage ledger data
@@ -254,6 +314,10 @@ onMounted(() => {
   if (props.autoDownload) {
     setTimeout(() => {
       downloadPdf();
+    }, 300);
+  } else if (props.autoPrint) {
+    setTimeout(() => {
+      printReceipt();
     }, 300);
   }
 });

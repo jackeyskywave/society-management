@@ -35,7 +35,7 @@
           <!-- Header Logo & Title -->
           <div class="receipt-header">
             <div class="logo-box">
-              <img src="/main_logo.png" alt="ARISTO BLISS" class="exact-logo-img" />
+              <img :src="LOGO_BASE64" alt="ARISTO BLISS" class="exact-logo-img" />
             </div>
 
             <div class="society-title-block">
@@ -99,7 +99,8 @@
             <div class="detail-item" v-if="editableData.bankDetail || editableData.cashReceiver">
               <span class="label">{{ editableData.paymentMode === 'BANK' ? 'Bank Detail :' : 'Cash Receiver :' }}</span>
               <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.paymentMode === 'BANK' ? editableData.bankDetail : editableData.cashReceiver }}</span>
-              <input v-else v-model="editableData.bankDetail" class="edit-input bold-val" />
+              <input v-else-if="editableData.paymentMode === 'BANK'" v-model="editableData.bankDetail" class="edit-input bold-val" />
+              <input v-else v-model="editableData.cashReceiver" class="edit-input bold-val" />
             </div>
           </div>
 
@@ -186,6 +187,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import html2pdf from 'html2pdf.js';
+import { LOGO_BASE64 } from '../assets/logoBase64.js';
 
 const props = defineProps({
   data: {
@@ -872,32 +874,32 @@ const downloadPdf = async () => {
 .receipt-paper.exporting-pdf {
   width: 740px !important;
   height: 510px !important;
-  padding: 10px 16px !important;
+  padding: 12px 18px !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
 }
-.receipt-paper.exporting-pdf .receipt-header { margin-bottom: 4px !important; }
-.receipt-paper.exporting-pdf .logo-box { width: 54px !important; height: 54px !important; }
-.receipt-paper.exporting-pdf .society-name { font-size: 14px !important; }
-.receipt-paper.exporting-pdf .society-tagline { font-size: 9px !important; margin: 0 !important; }
-.receipt-paper.exporting-pdf .society-address { font-size: 8.5px !important; }
-.receipt-paper.exporting-pdf .section-banner { padding: 3px !important; font-size: 11px !important; margin-bottom: 5px !important; }
-.receipt-paper.exporting-pdf .details-grid { row-gap: 2px !important; column-gap: 12px !important; font-size: 9.5px !important; margin-bottom: 5px !important; }
-.receipt-paper.exporting-pdf .detail-item { min-height: 14px !important; }
-.receipt-paper.exporting-pdf .detail-item .label { width: 118px !important; }
-.receipt-paper.exporting-pdf .adc-details-box > div { font-size: 9.5px !important; line-height: 1.25 !important; }
-.receipt-paper.exporting-pdf .receipt-table { font-size: 9.5px !important; margin-bottom: 4px !important; }
+.receipt-paper.exporting-pdf .receipt-header { margin-bottom: 8px !important; }
+.receipt-paper.exporting-pdf .logo-box { width: 62px !important; height: 62px !important; }
+.receipt-paper.exporting-pdf .society-name { font-size: 16px !important; }
+.receipt-paper.exporting-pdf .society-tagline { font-size: 10px !important; margin: 1px 0 !important; }
+.receipt-paper.exporting-pdf .society-address { font-size: 9px !important; }
+.receipt-paper.exporting-pdf .section-banner { padding: 4px !important; font-size: 12px !important; margin-bottom: 8px !important; }
+.receipt-paper.exporting-pdf .details-grid { row-gap: 4px !important; column-gap: 15px !important; font-size: 10px !important; margin-bottom: 8px !important; }
+.receipt-paper.exporting-pdf .detail-item { min-height: 18px !important; }
+.receipt-paper.exporting-pdf .detail-item .label { width: 130px !important; }
+.receipt-paper.exporting-pdf .adc-details-box > div { font-size: 10px !important; line-height: 1.3 !important; }
+.receipt-paper.exporting-pdf .receipt-table { font-size: 10px !important; margin-bottom: 6px !important; }
 .receipt-paper.exporting-pdf .receipt-table th,
-.receipt-paper.exporting-pdf .receipt-table td { padding: 3px 8px !important; }
-.receipt-paper.exporting-pdf .total-row td { font-size: 10.5px !important; }
-.receipt-paper.exporting-pdf .amount-words-block { font-size: 9.5px !important; margin-bottom: 4px !important; }
+.receipt-paper.exporting-pdf .receipt-table td { padding: 4px 8px !important; }
+.receipt-paper.exporting-pdf .total-row td { font-size: 11px !important; }
+.receipt-paper.exporting-pdf .amount-words-block { font-size: 10px !important; margin-bottom: 10px !important; }
 .receipt-paper.exporting-pdf .receipt-footer { margin-top: auto !important; }
-.receipt-paper.exporting-pdf .note-box { padding: 4px 8px !important; font-size: 8px !important; width: 55% !important; }
+.receipt-paper.exporting-pdf .note-box { padding: 5px 8px !important; font-size: 9px !important; width: 55% !important; }
 .receipt-paper.exporting-pdf .note-box ul li { line-height: 1.35 !important; }
-.receipt-paper.exporting-pdf .thank-you { margin-top: 2px !important; }
-.receipt-paper.exporting-pdf .sig-line { width: 100px !important; }
-.receipt-paper.exporting-pdf .sig-label { font-size: 8.5px !important; }
+.receipt-paper.exporting-pdf .thank-you { margin-top: 3px !important; }
+.receipt-paper.exporting-pdf .sig-line { width: 110px !important; }
+.receipt-paper.exporting-pdf .sig-label { font-size: 9px !important; }
 
 @media print {
   @page {

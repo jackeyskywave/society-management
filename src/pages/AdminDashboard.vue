@@ -476,79 +476,81 @@ const generateReceiptHtmlStr = (row) => {
   const extraDetailVal = paymentMode === 'BANK' ? bankDetail : cashReceiver;
 
   return `
-    <div class="receipt-paper" style="page-break-after: always; break-after: page; width: 198mm; height: 136mm; margin: 0 auto 20px auto; background-color: #ffffff; color: #000000; font-family: Arial, Helvetica, sans-serif; padding: 12px 18px; border: 2px solid #c59b27; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
-      <div class="receipt-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-        <div class="logo-box" style="display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37; padding: 2px; background-color: #ffffff; width: 65px; height: 65px;">
-          <img src="${LOGO_BASE64}" alt="ARISTO BLISS" style="width: 100%; height: 100%; object-fit: contain;" />
-        </div>
-        <div class="society-title-block" style="text-align: center;">
-          <h1 style="font-size: 16px; font-weight: 800; margin: 0; color: #111111;">ARISTO BLISS CO OP HOUSING SER. SOCIETY LTD</h1>
-          <p style="font-size: 10px; font-style: italic; margin: 1px 0; color: #444444;">We Care, We Share, We Build Better Living</p>
-          <p style="font-size: 9px; margin: 0; color: #555555;">Aristo Bliss Society, Near Saral Residency, GOTA 382481.</p>
-        </div>
-        <div class="date-block" style="font-size: 11px; font-weight: 700;">
-          <strong>DATE :&nbsp;</strong> <span>${date}</span>
-        </div>
-      </div>
-
-      <div class="section-banner" style="background-color: #c59b27; color: #ffffff; text-align: center; font-weight: 800; font-size: 12px; padding: 4px; letter-spacing: 1px; margin-bottom: 10px;">
-        MAINTENANCE PAYMENT RECEIPT
-      </div>
-
-      <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; row-gap: 5px; column-gap: 15px; font-size: 10px; margin-bottom: 10px;">
-        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Flat / Shop No. :</span><span style="font-weight: 800;">${flatNumber}</span></div>
-        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Maintenance Period :</span><span style="font-weight: 800;">${period}</span></div>
-        ${name && name.trim() ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Member Name :</span><span style="font-weight: 800;">${name}</span></div>` : ''}
-        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Property Type :</span><span style="font-weight: 800;">${propertyType}</span></div>
-        ${mobile && mobile.trim() ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Mobile No. :</span><span style="font-weight: 800;">${mobile}</span></div>` : ''}
-        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Owner / Tenant :</span><span style="font-weight: 800;">${ownerOrResident}</span></div>
-        <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Payment Mode :</span><span style="font-weight: 800;">${paymentMode}</span></div>
-        ${extraDetailVal ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">${extraDetailLabel}</span><span style="font-weight: 800;">${extraDetailVal}</span></div>` : ''}
-      </div>
-
-      <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 8px;">
-        <thead>
-          <tr>
-            <th style="background-color: #c59b27; color: #ffffff; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f; width: 10%;">SR. NO.</th>
-            <th style="background-color: #c59b27; color: #ffffff; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f; width: 65%;">PARTICULARS</th>
-            <th style="background-color: #c59b27; color: #ffffff; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f; width: 25%; text-align: right;">AMOUNT (₹)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">1</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Maintenance Charges</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${maintenanceCharges}</td></tr>
-          <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">2</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Late Payment Charges</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${lateCharges}</td></tr>
-          <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">3</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Other Charges (If Any)</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">0</td></tr>
-        </tbody>
-        <tfoot>
-          <tr style="background-color: #f7f3e8;">
-            <td colspan="2" style="text-align: right; font-weight: 800; padding: 4px 8px; border: 1px solid #e2e8f0; font-size: 11px;">TOTAL AMOUNT</td>
-            <td style="text-align: right; font-weight: 800; padding: 4px 8px; border: 1px solid #e2e8f0; font-size: 11px;">₹ ${totalAmount}</td>
-          </tr>
-        </tfoot>
-      </table>
-
-      <div class="amount-words-block" style="font-size: 10px; margin-bottom: 12px;">
-        <strong>Amount in Words :</strong> <span>${amountWords}</span>
-      </div>
-
-      <div class="receipt-footer" style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
-        <div class="note-box" style="border: 1.5px solid #c59b27; padding: 6px 10px; width: 55%; font-size: 9px; color: #222222;">
-          <div style="font-weight: 800; margin-bottom: 2px;">NOTE</div>
-          <ul style="list-style: none; padding: 0; margin: 0;">
-            <li>• Maintenance is to be paid by the 15th of every month.</li>
-            <li>• Rs.10 per day will be charged as late fee after the due date.</li>
-            <li>• Please collect receipt for every payment.</li>
-          </ul>
-          <div style="margin-top: 4px; font-weight: 700;">Thank you for your timely payment.</div>
-        </div>
-        <div class="signatures-box" style="display: flex; gap: 20px;">
-          <div style="display: flex; flex-direction: column; align-items: center; width: 110px;">
-            <span style="width: 100%; border-bottom: 1px solid #444; margin-bottom: 3px;"></span>
-            <span style="font-size: 9px;">Received By</span>
+    <div class="receipt-page" style="width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; page-break-after: always; break-after: page; page-break-inside: avoid; break-inside: avoid;">
+      <div class="receipt-paper" style="width: 198mm; height: 136mm; margin: auto; background-color: #ffffff; color: #000000; font-family: Arial, Helvetica, sans-serif; padding: 12px 18px; border: 2px solid #c59b27; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="receipt-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <div class="logo-box" style="display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37; padding: 2px; background-color: #ffffff; width: 65px; height: 65px;">
+            <img src="${LOGO_BASE64}" alt="ARISTO BLISS" style="width: 100%; height: 100%; object-fit: contain;" />
           </div>
-          <div style="display: flex; flex-direction: column; align-items: center; width: 110px;">
-            <span style="width: 100%; border-bottom: 1px solid #444; margin-bottom: 3px;"></span>
-            <span style="font-size: 9px;">Authorised Signatory</span>
+          <div class="society-title-block" style="text-align: center;">
+            <h1 style="font-size: 16px; font-weight: 800; margin: 0; color: #111111;">ARISTO BLISS CO OP HOUSING SER. SOCIETY LTD</h1>
+            <p style="font-size: 10px; font-style: italic; margin: 1px 0; color: #444444;">We Care, We Share, We Build Better Living</p>
+            <p style="font-size: 9px; margin: 0; color: #555555;">Aristo Bliss Society, Near Saral Residency, GOTA 382481.</p>
+          </div>
+          <div class="date-block" style="font-size: 11px; font-weight: 700;">
+            <strong>DATE :&nbsp;</strong> <span>${date}</span>
+          </div>
+        </div>
+
+        <div class="section-banner" style="background-color: #c59b27; color: #ffffff; text-align: center; font-weight: 800; font-size: 12px; padding: 4px; letter-spacing: 1px; margin-bottom: 10px;">
+          MAINTENANCE PAYMENT RECEIPT
+        </div>
+
+        <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; row-gap: 5px; column-gap: 15px; font-size: 10px; margin-bottom: 10px;">
+          <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Flat / Shop No. :</span><span style="font-weight: 800;">${flatNumber}</span></div>
+          <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Maintenance Period :</span><span style="font-weight: 800;">${period}</span></div>
+          ${name && name.trim() ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Member Name :</span><span style="font-weight: 800;">${name}</span></div>` : ''}
+          <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Property Type :</span><span style="font-weight: 800;">${propertyType}</span></div>
+          ${mobile && mobile.trim() ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Mobile No. :</span><span style="font-weight: 800;">${mobile}</span></div>` : ''}
+          <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Owner / Tenant :</span><span style="font-weight: 800;">${ownerOrResident}</span></div>
+          <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Payment Mode :</span><span style="font-weight: 800;">${paymentMode}</span></div>
+          ${extraDetailVal ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">${extraDetailLabel}</span><span style="font-weight: 800;">${extraDetailVal}</span></div>` : ''}
+        </div>
+
+        <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 8px;">
+          <thead>
+            <tr>
+              <th style="background-color: #c59b27; color: #ffffff; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f; width: 10%;">SR. NO.</th>
+              <th style="background-color: #c59b27; color: #ffffff; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f; width: 65%;">PARTICULARS</th>
+              <th style="background-color: #c59b27; color: #ffffff; padding: 4px 8px; font-weight: 800; border: 1px solid #b38a1f; width: 25%; text-align: right;">AMOUNT (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">1</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Maintenance Charges</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${maintenanceCharges}</td></tr>
+            <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">2</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Late Payment Charges</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">${lateCharges}</td></tr>
+            <tr><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">3</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0;">Other Charges (If Any)</td><td style="padding: 4px 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 800;">0</td></tr>
+          </tbody>
+          <tfoot>
+            <tr style="background-color: #f7f3e8;">
+              <td colspan="2" style="text-align: right; font-weight: 800; padding: 4px 8px; border: 1px solid #e2e8f0; font-size: 11px;">TOTAL AMOUNT</td>
+              <td style="text-align: right; font-weight: 800; padding: 4px 8px; border: 1px solid #e2e8f0; font-size: 11px;">₹ ${totalAmount}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="amount-words-block" style="font-size: 10px; margin-bottom: 12px;">
+          <strong>Amount in Words :</strong> <span>${amountWords}</span>
+        </div>
+
+        <div class="receipt-footer" style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
+          <div class="note-box" style="border: 1.5px solid #c59b27; padding: 6px 10px; width: 55%; font-size: 9px; color: #222222;">
+            <div style="font-weight: 800; margin-bottom: 2px;">NOTE</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li>• Maintenance is to be paid by the 15th of every month.</li>
+              <li>• Rs.10 per day will be charged as late fee after the due date.</li>
+              <li>• Please collect receipt for every payment.</li>
+            </ul>
+            <div style="margin-top: 4px; font-weight: 700;">Thank you for your timely payment.</div>
+          </div>
+          <div class="signatures-box" style="display: flex; gap: 20px;">
+            <div style="display: flex; flex-direction: column; align-items: center; width: 110px;">
+              <span style="width: 100%; border-bottom: 1px solid #444; margin-bottom: 3px;"></span>
+              <span style="font-size: 9px;">Received By</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; width: 110px;">
+              <span style="width: 100%; border-bottom: 1px solid #444; margin-bottom: 3px;"></span>
+              <span style="font-size: 9px;">Authorised Signatory</span>
+            </div>
           </div>
         </div>
       </div>
@@ -572,8 +574,8 @@ const printSelectedReceipts = () => {
           <style>
             @page { size: A5 landscape; margin: 0; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
-            html, body { margin: 0; padding: 0; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; }
-            .receipt-paper { page-break-after: always !important; break-after: page !important; }
+            html, body { height: 100%; margin: 0; padding: 0; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; }
+            .receipt-page { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; page-break-after: always !important; break-after: page !important; }
           </style>
         </head>
         <body>

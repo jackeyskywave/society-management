@@ -501,7 +501,6 @@ const generateReceiptHtmlStr = (row) => {
           ${mobile && mobile.trim() ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Mobile No. :</span><span style="font-weight: 800;">${mobile}</span></div>` : ''}
           <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Owner / Tenant :</span><span style="font-weight: 800;">${ownerOrResident}</span></div>
           <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Payment Mode :</span><span style="font-weight: 800;">${paymentMode}</span></div>
-          ${paymentMode === 'BANK' && bankDetail ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Bank Detail :</span><span style="font-weight: 800;">${bankDetail}</span></div>` : ''}
         </div>
 
         <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 8px;">

@@ -96,11 +96,7 @@
               <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.paymentMode }}</span>
               <input v-else v-model="editableData.paymentMode" class="edit-input bold-val" />
             </div>
-            <div class="detail-item" v-if="editableData.paymentMode === 'BANK' || editableData.bankDetail">
-              <span class="label">Bank Detail :</span>
-              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.bankDetail }}</span>
-              <input v-else v-model="editableData.bankDetail" class="edit-input bold-val" />
-            </div>
+
           </div>
 
           <!-- Table -->

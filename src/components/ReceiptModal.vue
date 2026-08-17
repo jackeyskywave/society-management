@@ -96,11 +96,10 @@
               <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.paymentMode }}</span>
               <input v-else v-model="editableData.paymentMode" class="edit-input bold-val" />
             </div>
-            <div class="detail-item" v-if="editableData.bankDetail || editableData.cashReceiver">
-              <span class="label">{{ editableData.paymentMode === 'BANK' ? 'Bank Detail :' : 'Cash Receiver :' }}</span>
-              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.paymentMode === 'BANK' ? editableData.bankDetail : editableData.cashReceiver }}</span>
-              <input v-else-if="editableData.paymentMode === 'BANK'" v-model="editableData.bankDetail" class="edit-input bold-val" />
-              <input v-else v-model="editableData.cashReceiver" class="edit-input bold-val" />
+            <div class="detail-item" v-if="editableData.paymentMode === 'BANK' || editableData.bankDetail">
+              <span class="label">Bank Detail :</span>
+              <span v-if="isExportingPdf" class="pdf-export-val bold-val">{{ editableData.bankDetail }}</span>
+              <input v-else v-model="editableData.bankDetail" class="edit-input bold-val" />
             </div>
           </div>
 
@@ -410,9 +409,9 @@ const printReceipt = async () => {
         <head>
           <title>Receipt_${editableData.value.flatNumber}</title>
           <style>
-            @page { size: A5 landscape; margin: 0; }
+            @page { size: 210mm 148mm; margin: 0; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
-            html, body { height: 100%; margin: 0; padding: 0; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; display: flex; align-items: center; justify-content: center; }
+            html, body { width: 210mm; height: 148mm; margin: 0; padding: 0; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; display: flex; align-items: center; justify-content: center; }
             .receipt-paper { width: 198mm; height: 136mm; margin: auto; background-color: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif; padding: 12px 18px; border: 2px solid #c59b27 !important; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
             .receipt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
             .logo-box { display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37 !important; padding: 2px; background-color: #ffffff !important; width: 65px; height: 65px; }
@@ -903,8 +902,8 @@ const downloadPdf = async () => {
 
 @media print {
   @page {
-    size: A5 landscape;
-    margin: 3mm;
+    size: 210mm 148mm;
+    margin: 0;
   }
   
   /* Hide everything outside modal */

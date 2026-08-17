@@ -471,12 +471,9 @@ const generateReceiptHtmlStr = (row) => {
   const amountWords = `Rupees ${numberToWords(totalAmount)} Only`;
 
   const bankDetail = row.bankDetail || '';
-  const cashReceiver = row.cashReceiver || '';
-  const extraDetailLabel = paymentMode === 'BANK' ? 'Bank Detail :' : 'Cash Receiver :';
-  const extraDetailVal = paymentMode === 'BANK' ? bankDetail : cashReceiver;
 
   return `
-    <div class="receipt-page" style="width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; page-break-after: always; break-after: page; page-break-inside: avoid; break-inside: avoid;">
+    <div class="receipt-page" style="width: 210mm; height: 148mm; display: flex; align-items: center; justify-content: center; page-break-after: always; break-after: page; page-break-inside: avoid; break-inside: avoid; margin: 0 auto; box-sizing: border-box;">
       <div class="receipt-paper" style="width: 198mm; height: 136mm; margin: auto; background-color: #ffffff; color: #000000; font-family: Arial, Helvetica, sans-serif; padding: 12px 18px; border: 2px solid #c59b27; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
         <div class="receipt-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
           <div class="logo-box" style="display: flex; align-items: center; justify-content: center; border: 1px solid #d4af37; padding: 2px; background-color: #ffffff; width: 65px; height: 65px;">
@@ -504,7 +501,7 @@ const generateReceiptHtmlStr = (row) => {
           ${mobile && mobile.trim() ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Mobile No. :</span><span style="font-weight: 800;">${mobile}</span></div>` : ''}
           <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Owner / Tenant :</span><span style="font-weight: 800;">${ownerOrResident}</span></div>
           <div style="display: flex;"><span style="width: 130px; font-weight: 800;">Payment Mode :</span><span style="font-weight: 800;">${paymentMode}</span></div>
-          ${extraDetailVal ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">${extraDetailLabel}</span><span style="font-weight: 800;">${extraDetailVal}</span></div>` : ''}
+          ${paymentMode === 'BANK' && bankDetail ? `<div style="display: flex;"><span style="width: 130px; font-weight: 800;">Bank Detail :</span><span style="font-weight: 800;">${bankDetail}</span></div>` : ''}
         </div>
 
         <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 8px;">
@@ -572,10 +569,10 @@ const printSelectedReceipts = () => {
         <head>
           <title>Bulk_Receipts_Print</title>
           <style>
-            @page { size: A5 landscape; margin: 0; }
+            @page { size: 210mm 148mm; margin: 0; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
-            html, body { height: 100%; margin: 0; padding: 0; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; }
-            .receipt-page { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; page-break-after: always !important; break-after: page !important; }
+            html, body { width: 210mm; height: 148mm; margin: 0; padding: 0; background: #ffffff !important; color: #000000 !important; font-family: Arial, Helvetica, sans-serif !important; }
+            .receipt-page { width: 210mm; height: 148mm; display: flex; align-items: center; justify-content: center; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; margin: 0 auto; }
           </style>
         </head>
         <body>
